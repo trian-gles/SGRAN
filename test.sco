@@ -1,14 +1,16 @@
 set_option("play = 0")
 
-
 rtsetparams(44100, 2)
-load("./libMYINST.so")
+rtoutput("testsynth.wav")
 
-rtinput("../../snd/input.wav")
-rtoutput("test.wav")
+load("./libMYSYNTH.so")
 
-amp = maketable("line", 1000, 0,0, 1,1, 5,1, 6,0)
-pan = maketable("line", 1000, 0,0, 1,1)
+env = maketable("line", 1000, 0,0, 1,1, 19,1, 20,0)
 
-MYINST(st=0, inskip=0, DUR(), amp, inchan=0, pan)
+for (st = 0; st < 8; st = st + .10) {
+   dur = .03 + (.06 * random())
+   amp = 4000 + (rand() * 3000)
+   MYSYNTH(st, dur, amp * env, pan=random())
+}
+
 
