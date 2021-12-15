@@ -1,6 +1,6 @@
 include package.conf
 
-NAME = MYSYNTH
+NAME = SIMPLEOSC
 
 OBJS = $(NAME).o
 CMIXOBJS += $(PROFILE_O)
