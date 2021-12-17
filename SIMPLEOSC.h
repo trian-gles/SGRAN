@@ -12,6 +12,5 @@ public:
 private:
 	void doupdate();
 	Ooscili *theOscil;
-	float amp;
 };
 

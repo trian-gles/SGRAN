@@ -7,7 +7,7 @@
 #include "SIMPLEOSC.h"			  // declarations for this instrument class
 #include <rt.h>
 #include <rtdefs.h>
-
+#include <iostream>
 
 // Construct an instance of this instrument and initialize some variables.
 // Using an underbar as the first character of a data member is a nice
@@ -15,7 +15,7 @@
 // to see at a glance whether you're looking at a local variable or a
 // data member.
 
-SIMPLEOSC::SIMPLEOSC()
+SIMPLEOSC::SIMPLEOSC() : theOscil(NULL)
 {
 }
 
@@ -24,6 +24,7 @@ SIMPLEOSC::SIMPLEOSC()
 
 SIMPLEOSC::~SIMPLEOSC()
 {
+	delete theOscil;
 }
 
 
@@ -45,12 +46,14 @@ int SIMPLEOSC::init(double p[], int n_args)
 		p3: freq
 		p4: wavetable */
 	int idk = rtsetoutput(p[0], p[1], this);
-	amp = p[2];
-	int tablelen = 0;
-	double* wavetable = (double *) getPFieldTable(4, &tablelen);
+	int amptablelen = 0;
+	int wavetablelen = 0;
 
-	// by the sampling rate and then rounded to the nearest integer.
-	theOscil = new Ooscili(SR, p[3], wavetable, tablelen);
+	// init wavetable
+	std::cout << "initializing wavetable\n";
+	double* wavetable = (double *) getPFieldTable(4, &wavetablelen);
+	std::cout << "wavetable length:" << wavetablelen << "\n";
+	theOscil = new Ooscili(SR, p[3], wavetable, wavetablelen);
 
 	return nSamps();
 }
@@ -79,7 +82,11 @@ int SIMPLEOSC::run()
 	float out[2];
 
 	for (int i = 0; i < framesToRun(); i++) {
+		double p[4];
 		float out[2];
+		int cf = currentFrame();
+		update(p, 4, 1 << 2);
+		float amp = p[2];
 		out[0] = theOscil->next() * amp;
 		out[1] = out[0];
 		rtaddout(out);
