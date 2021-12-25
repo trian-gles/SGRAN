@@ -1,6 +1,6 @@
 include package.conf
 
-NAME = SIMPLEOSC
+NAME = SGRAN2
 
 OBJS = $(NAME).o
 CMIXOBJS += $(PROFILE_O)
