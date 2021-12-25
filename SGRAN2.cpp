@@ -48,27 +48,34 @@ int SGRAN2::init(double p[], int n_args)
 		p0: inskip
 		p1: dur
 		p2: amp
-		p3: freq
+		p3: grainRate
 		p4: grainDur
-		p5: grainRate
-		p6: wavetable
-		p7: grainEnv*/
+		p5: freqLow
+		p6: freqMid
+		p7: freqHigh
+		p8: freqTight
+		p9: wavetable
+		p10: grainEnv*/
 	std::cout<<"setting basic params"<<"\n";
 	int idk = rtsetoutput(p[0], p[1], this);
 	grainEnvLen = 0;
 	wavetableLen = 0;
 	amp = p[2];
-	freq = p[3];
 	grainDur = p[4];
-	grainRate = p[5];
+	grainRate = p[3];
+
+	freqLow = (double)p[5];
+	freqMid = (double)p[6]; if (freqMid < freqLow) freqMid = freqLow;
+	freqHigh = (double)p[7]; if (freqHigh < freqMid) freqHigh = freqMid;
+	freqTight = (double)p[8];
 
 	newGrainCounter = 0;
 	grainRateSamps = round(grainRate * SR );
 
 	// init tables
 	std::cout<<"making tables"<<"\n";
-	wavetable = (double *) getPFieldTable(6, &wavetableLen);
-	grainEnv = (double *) getPFieldTable(7, &grainEnvLen);
+	wavetable = (double *) getPFieldTable(9, &wavetableLen);
+	grainEnv = (double *) getPFieldTable(10, &grainEnvLen);
 
 	// make the needed grains, which have no values yet as they need to be created dynamically
 	std::cout<<"setting up some basic grains"<<"\n";
@@ -96,8 +103,29 @@ int SGRAN2::configure()
 	return 0;	// IMPORTANT: Return 0 on success, and -1 on failure.
 }
 // void addgrain(float sampInc; float freq; float dur; float pan; bool isplaying;);
-//        void resetgrain(Grain* grain);
+//        void resetgrsain(Grain* grain);
 //        int calcgrainsrequired();
+
+double SGRAN2::prob(double low,double mid,double high,double tight)
+        // Returns a value within a range close to a preferred value
+                    // tightness: 0 max away from mid
+                     //               1 even distribution
+                      //              2+amount closeness to mid
+                      //              no negative allowed
+{
+	int repeat;
+	double range, num, sign;
+
+	range = (high-mid) > (mid-low) ? high-mid : mid-low;
+	do {
+	  	if (rrand() > 0.)
+			sign = 1.;
+		else  sign = -1.;
+	  	num = mid + sign*(pow((rrand()+1.)*.5,tight)*range);
+	} while(num < low || num > high);
+	return(num);
+}
+
 
 //add a new grain to the grain list
 void SGRAN2::addgrain(float waveSampInc,float ampSampInc, int dur, float pan, bool isplaying)
@@ -112,6 +140,7 @@ void SGRAN2::addgrain(float waveSampInc,float ampSampInc, int dur, float pan, bo
 // set new parameters and turn on an idle grain
 void SGRAN2::resetgrain(Grain* grain)
 {
+	float freq = (float)prob(freqLow, freqMid, freqHigh, freqTight);
 	(*grain).waveSampInc = wavetableLen * freq / SR;
 	(*grain).ampSampInc = grainEnvLen * (1 / grainDur) / SR;
 	(*grain).currTime = 0;
@@ -119,12 +148,14 @@ void SGRAN2::resetgrain(Grain* grain)
 	(*grain).wavePhase = 0;
 	(*grain).ampPhase = 0;
 	(*grain).dur = (int)round(grainDur * SR);
+	std::cout<<"sending grain with freq : " << freq << " dur : " << grain->dur << "\n";
+
 }
 
 // determine the maximum grains we need total
 int SGRAN2::calcgrainsrequired()
 {
-	return ceil(grainDur / grainRate);
+	return ceil(grainDur / grainRate) + 1;
 }
 
 // Called by the scheduler for every time slice in which this instrument
@@ -156,9 +187,8 @@ int SGRAN2::run()
 				else
 				{
 					// at some point, make your own interpolation
-					float grainAmp = oscil(1,(*currGrain).ampSampInc, grainEnv, grainEnvLen, &((*currGrain).wavePhase));
+					float grainAmp = oscil(1, currGrain->ampSampInc, grainEnv, grainEnvLen, &((*currGrain).ampPhase));
 					monoout += oscil(grainAmp,(*currGrain).waveSampInc, wavetable, wavetableLen, &((*currGrain).wavePhase));
-					currGrain->currTime++;
 					totalCurrGrains++; //there are smarter ways to do this!!!
 				}
 			}

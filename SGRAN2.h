@@ -13,11 +13,15 @@ public:
 	virtual int configure();
 	virtual int run();
 	void addgrain(float waveSampInc, float ampSampInc,int dur, float pan, bool isplaying);
+	double prob(double low,double mid,double high,double tight);
 	void resetgrain(Grain* grain);
 	int calcgrainsrequired();
 
 private:
-	float freq;
+	double freqLow;
+	double freqMid;
+	double freqHigh;
+	double freqTight;
 	float amp;
 
 	std::vector<Grain*>* grains;
