@@ -22,17 +22,23 @@ private:
 	double freqMid;
 	double freqHigh;
 	double freqTight;
+
+	double grainDurLow;
+	double grainDurMid;
+	double grainDurHigh;
+	double grainDurTight;
+
 	float amp;
 
 	std::vector<Grain*>* grains;
 	bool needNewGrain;
 	int newGrainCounter;
 	int grainRateSamps;
+	int grainsRequired;
 	double* wavetable;
 	int wavetableLen;
 	double* grainEnv;
 	int grainEnvLen;
-	float grainDur;
 	float grainRate;
 	void doupdate();
 };
