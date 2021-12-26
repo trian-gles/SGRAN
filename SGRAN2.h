@@ -18,6 +18,8 @@ public:
 	int calcgrainsrequired();
 
 private:
+	int branch;
+
 	double freqLow;
 	double freqMid;
 	double freqHigh;

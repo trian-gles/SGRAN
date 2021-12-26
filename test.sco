@@ -30,18 +30,19 @@ load("./libSGRAN2.so")
                 p21: grainEnv
         */
 
-wave = maketable("wave", 1000, "sine")
+wave = maketable("wave", 1000, "saw")
 env = src_env = maketable("window", 1000, "hanning")
+amp = maketable("line", 1000, 0, 0, 1, 1, 2, 0)
 
-SGRAN2(0, 5.5, 20000, 
+SGRAN2(0, 8.5, 150000 * amp, 
 //grain rate
 0.02, 0.05, 0.04, 0.6, 4, 
 //grain dur
-0.01, 0.1, 0.6, 0.1, 
+0.01, 0.1, 0.2, 0.1, 
 //freq
-220, 440, 880, 0.07, 
+400, 430, 440, 6, 
 //pan
-0, 0.5, 1, 0.4,
+0, 0.8, 1, 0.4,
 //wavetables
 wave, env)
 

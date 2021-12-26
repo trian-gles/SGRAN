@@ -16,7 +16,7 @@
 // to see at a glance whether you're looking at a local variable or a
 // data member.
 
-SGRAN2::SGRAN2()
+SGRAN2::SGRAN2() : branch(0)
 {
 }
 
@@ -184,7 +184,7 @@ void SGRAN2::resetgrain(Grain* grain)
 	grain->panR = panR;
 	grain->panL = 1 - panR;
 	(*grain).dur = (int)round(grainDurSamps);
-	std::cout<<"sending grain with freq : " << freq << " dur : " << grain->dur << " panR " << panR << "\n";
+	//std::cout<<"sending grain with freq : " << freq << " dur : " << grain->dur << " panR " << panR << "\n";
 
 }
 
@@ -194,15 +194,28 @@ int SGRAN2::calcgrainsrequired()
 	return ceil(grainDurHigh / (grainRateVarLow * grainRate)) + 1;
 }
 
+
+// update pfields
+void SGRAN2::doupdate()
+{
+	double p[3];
+	update(p, 3, 1 << 2);
+	amp =(float) p[2] / grainsRequired;
+	//std::cout<<"updating amp to " << amp << "\n";
+
+}
+
 // Called by the scheduler for every time slice in which this instrument
 // should run.  This is where the real work of the instrument is done.
-
 int SGRAN2::run()
 {
 	//std::cout<<"new control block"<<"\n";
 	float out[2];
 	for (int i = 0; i < framesToRun(); i++) {
 		//std::cout<<"running frame "<< currentFrame() << "\n";
+
+		if (--branch <= 0) {doupdate();}
+
 		out[0] = 0;
 		out[1] = 0;
 		if ((newGrainCounter == 0))
