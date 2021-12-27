@@ -26,7 +26,8 @@ SGRAN2::SGRAN2() : branch(0), grainsUsed(0)
 
 SGRAN2::~SGRAN2()
 {
-	std::cout << "grains allocated " << grainsRequired << " grains used " << grainsUsed;
+	std::cout << "grains allocated " << grainsRequired << " grains used " << grainsUsed << "\n";
+	std::cout << "avg grains needed" << grainDurMid / (grainRateVarMid * grainRate) << "\n";
 	for (size_t i = 0; i < grains->size(); i++)
 	{
 		delete (*grains)[i];
@@ -114,7 +115,7 @@ int SGRAN2::init(double p[], int n_args)
 	amp /= grainsRequired;
 	std::cout<<"amp = " << amp << "\n";
 	std::cout<<"required grains = " << grainsRequired << "\n";
-	for (int i = 0; i < grainsRequired; i++)
+	for (int i = 0; i < 1000; i++)
 	{
 		addgrain(0, 0, 0, 0, false);
 	}
@@ -190,6 +191,11 @@ void SGRAN2::resetgrain(Grain* grain)
 
 }
 
+void SGRAN2::resetgraincounter()
+{
+	newGrainCounter = (int)round(grainRateSamps * prob(grainRateVarLow, grainRateVarMid, grainRateVarHigh, grainRateVarTight));
+}
+
 // determine the maximum grains we need total
 int SGRAN2::calcgrainsrequired()
 {
@@ -250,11 +256,18 @@ int SGRAN2::run()
 			{
 				// std::cout<<"resetting grain \n";
 				resetgrain(currGrain);
-				newGrainCounter = (int)round(grainRateSamps * prob(grainRateVarLow, grainRateVarMid, grainRateVarHigh, grainRateVarTight));
+				resetgraincounter();
 			}
 		}
 		//std::cout<<"total curr grains : "<<totalCurrGrains<<"\n";
 		//std::cout<<"left output before amp: " << out[0] << "\n";
+
+		// if all current grains are occupied, we skip this request for a new grain
+		if (newGrainCounter == 0)
+		{
+			resetgraincounter();
+		}
+
 		out[0] *= amp;
 		out[1] *= amp;
 		rtaddout(out);

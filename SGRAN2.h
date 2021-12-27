@@ -15,6 +15,7 @@ public:
 	void addgrain(float waveSampInc, float ampSampInc,int dur, float pan, bool isplaying);
 	double prob(double low,double mid,double high,double tight);
 	void resetgrain(Grain* grain);
+	void resetgraincounter();
 	int calcgrainsrequired();
 
 private:
