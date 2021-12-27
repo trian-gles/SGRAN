@@ -47,6 +47,7 @@ private:
 	double grainRateVarHigh;
 	double grainRateVarTight;
 
+	int grainsUsed;
 	int grainsRequired;
 	double* wavetable;
 	int wavetableLen;

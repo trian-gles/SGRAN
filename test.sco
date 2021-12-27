@@ -1,7 +1,4 @@
-set_option("play = 0")
-
 rtsetparams(44100, 2)
-rtoutput("synth.wav")
 
 load("./libSGRAN2.so")
 

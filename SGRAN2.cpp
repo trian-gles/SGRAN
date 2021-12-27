@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <ugens.h>
 #include <math.h>
+#include <algorithm>
 #include <PField.h>
 #include <Instrument.h>
 #include "SGRAN2.h"			  // declarations for this instrument class
@@ -16,7 +17,7 @@
 // to see at a glance whether you're looking at a local variable or a
 // data member.
 
-SGRAN2::SGRAN2() : branch(0)
+SGRAN2::SGRAN2() : branch(0), grainsUsed(0)
 {
 }
 
@@ -25,6 +26,7 @@ SGRAN2::SGRAN2() : branch(0)
 
 SGRAN2::~SGRAN2()
 {
+	std::cout << "grains allocated " << grainsRequired << " grains used " << grainsUsed;
 	for (size_t i = 0; i < grains->size(); i++)
 	{
 		delete (*grains)[i];
@@ -213,15 +215,15 @@ int SGRAN2::run()
 	float out[2];
 	for (int i = 0; i < framesToRun(); i++) {
 		//std::cout<<"running frame "<< currentFrame() << "\n";
-
+		int grainsCurrUsed = 0;
 		if (--branch <= 0) {doupdate();}
 
 		out[0] = 0;
 		out[1] = 0;
-		if ((newGrainCounter == 0))
-		{
-			std::cout<<"we need a new grain!\n";
-		}
+		//if ((newGrainCounter == 0))
+		//{
+		//	std::cout<<"we need a new grain!\n";
+		//}
 		for (size_t j = 0; j < grains->size(); j++)
 		{
 			Grain* currGrain = (*grains)[j];
@@ -230,7 +232,7 @@ int SGRAN2::run()
 				if (++(*currGrain).currTime > (*currGrain).dur)
 				{
 					(*currGrain).isplaying = false;
-					std::cout<<"turning off grain \n";
+					// std::cout<<"turning off grain \n";
 				}
 				else
 				{
@@ -239,13 +241,14 @@ int SGRAN2::run()
 					float grainOut = oscil(grainAmp,(*currGrain).waveSampInc, wavetable, wavetableLen, &((*currGrain).wavePhase));
 					out[0] += grainOut * currGrain->panL;
 					out[1] += grainOut * currGrain->panR;
+					grainsCurrUsed++;
 				}
 			}
 			// this is not an else statement so a grain can be potentially stopped and restarted on the same frame
 
 			if ((newGrainCounter == 0) && !(*currGrain).isplaying)
 			{
-				std::cout<<"resetting grain \n";
+				// std::cout<<"resetting grain \n";
 				resetgrain(currGrain);
 				newGrainCounter = (int)round(grainRateSamps * prob(grainRateVarLow, grainRateVarMid, grainRateVarHigh, grainRateVarTight));
 			}
@@ -257,6 +260,7 @@ int SGRAN2::run()
 		rtaddout(out);
 		newGrainCounter--;
 		increment();
+		grainsUsed = std::max(grainsUsed, grainsCurrUsed);
 	}
 
 	// Return the number of frames we processed.
