@@ -26,8 +26,7 @@ SGRAN2::SGRAN2() : branch(0), grainsUsed(0)
 
 SGRAN2::~SGRAN2()
 {
-	std::cout << "grains allocated " << grainsRequired << " grains used " << grainsUsed << "\n";
-	std::cout << "avg grains needed" << grainDurMid / (grainRateVarMid * grainRate) << "\n";
+	std::cout << " grains used " << grainsUsed << "\n";
 	for (size_t i = 0; i < grains->size(); i++)
 	{
 		delete (*grains)[i];
@@ -71,7 +70,6 @@ int SGRAN2::init(double p[], int n_args)
 		p20: wavetable
 		p21: grainEnv
 	*/
-	std::cout<<"setting basic params"<<"\n";
 	int idk = rtsetoutput(p[0], p[1], this);
 	grainEnvLen = 0;
 	wavetableLen = 0;
@@ -104,20 +102,20 @@ int SGRAN2::init(double p[], int n_args)
 	grainRateSamps = round(grainRate * SR);
 
 	// init tables
-	std::cout<<"making tables"<<"\n";
 	wavetable = (double *) getPFieldTable(20, &wavetableLen);
 	grainEnv = (double *) getPFieldTable(21, &grainEnvLen);
 
-	// make the needed grains, which have no values yet as they need to be created dynamically
-	std::cout<<"setting up some basic grains"<<"\n";
+	// make the needed grains, which have no values yet as they need to be set dynamically
 	grains = new std::vector<Grain*>();
 	grainsRequired = calcgrainsrequired();
 	amp /= grainsRequired;
 	std::cout<<"amp = " << amp << "\n";
-	std::cout<<"required grains = " << grainsRequired << "\n";
-	for (int i = 0; i < 1000; i++)
+	std::cout<<"estimated grains = " << grainsRequired << "\n";
+
+	// maybe make the maximum grain value a non-pfield enabled parameter
+	for (int i = 0; i < 1500; i++)
 	{
-		addgrain(0, 0, 0, 0, false);
+		addgrain();
 	}
 
 	return nSamps();
@@ -162,13 +160,12 @@ double SGRAN2::prob(double low,double mid,double high,double tight)
 }
 
 
-//add a new grain to the grain list
-void SGRAN2::addgrain(float waveSampInc,float ampSampInc, int dur, float pan, bool isplaying)
+void SGRAN2::addgrain()
 {
 	// typedef struct {float waveSampInc; float ampSampInc; float wavePhase; float ampPhase; float dur; float panR; float panL float currTime; bool isplaying;} Grain;
 
 
-	Grain* newgrain = new Grain{waveSampInc,ampSampInc, 0, 0, dur, pan,1-pan, 0, isplaying};
+	Grain* newgrain = new Grain{0,0, 0, 0, 0, 0, 0, 0, false};
 	grains->push_back(newgrain);
 }
 
@@ -199,7 +196,7 @@ void SGRAN2::resetgraincounter()
 // determine the maximum grains we need total
 int SGRAN2::calcgrainsrequired()
 {
-	return ceil(grainDurHigh / (grainRateVarLow * grainRate)) + 1;
+	return ceil(grainDurMid / (grainRateVarMid * grainRate)) + 1;
 }
 
 
