@@ -213,10 +213,35 @@ int SGRAN2::calcgrainsrequired()
 // update pfields
 void SGRAN2::doupdate()
 {
-	double p[3];
-	update(p, 3, 1 << 2);
-	amp =(float) p[2] / grainsRequired;
+	double p[20];
+	update(p, 20);
+	amp =(float) p[2];
+
+	grainDurLow = (double)p[8];
+	grainDurMid = (double)p[9]; if (grainDurMid < grainDurLow) grainDurMid = grainDurLow;
+	grainDurHigh = (double)p[10]; if (grainDurHigh < grainDurMid) grainDurHigh = grainDurMid;
+	grainDurTight = (double)p[11];
+
+
+	grainRateVarLow = (double)p[4];
+	grainRateVarMid = (double)p[5]; if (grainRateVarMid < grainRateVarLow) grainRateVarMid = grainRateVarLow;
+	grainRateVarHigh = (double)p[6]; if (grainRateVarHigh < grainRateVarMid) grainRateVarHigh = grainRateVarMid;
+	grainRateVarTight = (double)p[7];
+
+	freqLow = (double)p[12];
+	freqMid = (double)p[13]; if (freqMid < freqLow) freqMid = freqLow;
+	freqHigh = (double)p[14]; if (freqHigh < freqMid) freqHigh = freqMid;
+	freqTight = (double)p[15];
+
+
+	panLow = (double)p[16];
+	panMid = (double)p[17]; if (panMid < panLow) panMid = panLow;
+	panHigh = (double)p[18]; if (panHigh < panMid) panHigh = panMid;
+	panTight = (double)p[19];
 	//std::cout<<"updating amp to " << amp << "\n";
+
+	grainsRequired = calcgrainsrequired();
+	amp /= grainsRequired;
 
 }
 
