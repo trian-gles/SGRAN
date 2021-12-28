@@ -39,7 +39,6 @@ private:
 	float amp;
 
 	std::vector<Grain*>* grains;
-	bool needNewGrain;
 	int newGrainCounter;
 
 	int grainRateSamps;
@@ -48,7 +47,6 @@ private:
 	double grainRateVarHigh;
 	double grainRateVarTight;
 
-	int grainsUsed;
 	int grainsRequired;
 	double* wavetable;
 	int wavetableLen;

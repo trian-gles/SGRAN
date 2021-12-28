@@ -17,7 +17,7 @@
 // to see at a glance whether you're looking at a local variable or a
 // data member.
 
-SGRAN2::SGRAN2() : branch(0), grainsUsed(0)
+SGRAN2::SGRAN2() : branch(0)
 {
 }
 
