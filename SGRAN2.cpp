@@ -165,7 +165,17 @@ void SGRAN2::addgrain()
 	// typedef struct {float waveSampInc; float ampSampInc; float wavePhase; float ampPhase; float dur; float panR; float panL float currTime; bool isplaying;} Grain;
 
 
-	Grain* newgrain = new Grain{0,0, 0, 0, 0, 0, 0, 0, false};
+	Grain* newgrain = new Grain();
+	newgrain-> waveSampInc = 0;
+	newgrain-> ampSampInc = 0;
+	newgrain-> wavePhase = 0;
+	newgrain-> ampPhase = 0;
+	newgrain-> dur = 0;
+	newgrain-> panR = 0;
+	newgrain-> panL = 0;
+	newgrain-> currTime = 0;
+	newgrain-> isplaying = false;
+
 	grains->push_back(newgrain);
 }
 
