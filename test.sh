@@ -1,3 +1,3 @@
 #!/bin/bash
 make
-CMIX -D pulse < test.sco
+CMIX -D pulse < ex2.sco
