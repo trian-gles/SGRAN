@@ -1,6 +1,18 @@
-Stochastic granular synthesizer based on Dr. Mara Helmuth's SGRANR instrument.
-Currently allows a limit of 1500 overlapping grains.  Don't worry about this as the instrument will simply slow down the rate without any audible artifacts if you exceed this.
+# about
+Stochastic granular synthesizer for RTcmix version 4.5 based on Dr. Mara Helmuth's SGRANR instrument.
+Currently allows a limit of 1500 overlapping grains.  Upon exceeding this, the instrument will simply slow down the rate without any audible artifacts if you exceed this.
 
+# examples
+
+https://user-images.githubusercontent.com/69212477/147691785-44a433a8-5641-47cd-8736-3a59bc73df5a.mp4
+
+
+https://user-images.githubusercontent.com/69212477/147691891-53d72308-b080-4f00-8393-49e684ce733b.mp4
+
+
+# usage
+
+Make sure the package.conf points to the appropriate makefile.conf before building.
 
 Args:  
     - p0: inskip  
