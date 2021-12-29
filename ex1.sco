@@ -1,5 +1,5 @@
 rtsetparams(44100, 2)
-//rtoutput("test.wav")
+rtoutput("ex1.wav")
 load("./libSGRAN2.so")
 
         /* Args:
