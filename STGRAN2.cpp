@@ -17,49 +17,35 @@
 // to see at a glance whether you're looking at a local variable or a
 // data member.
 
-AUDIOBUFFER::AUDIOBUFFER(int maxSize) : _maxSize(maxSize)
+AUDIOBUFFER::AUDIOBUFFER(int maxSize): _head(0)
 {
-        _buffer = new std::vector<double>();
+    _buffer = new std::vector<double>(maxSize);
 }
 
 AUDIOBUFFER::~AUDIOBUFFER()
 {
-        delete _buffer;
+    delete _buffer;
 }
 
 void AUDIOBUFFER::Append(double sample)
 {
-        _buffer->push_back(sample);
+    (*_buffer)[_head] = sample;
+    _head = (_head + 1) % _buffer->size();
 }
 
-double AUDIOBUFFER::Get(int index) // maybe add interpolation at some point
+double AUDIOBUFFER::Get(float index) // maybe add interpolation at some point
 {
-    if (index >= (int) _buffer->size() || index < 0)
-    {
-        std::cout << "Attemting to access out of range index";
-        return 0;
-    }
-    return (*_buffer)[index];
+    return (*_buffer)[(int) floor(index) % _buffer->size()];
 }
 
-int AUDIOBUFFER::LimitSize()
+int AUDIOBUFFER::GetHead()
 {
-        int bufSize = (int) _buffer->size();
-        if (bufSize > _maxSize)
-        {
-                int shift = bufSize - _maxSize;
-                for (int i = shift; i < bufSize; i++)
-                {
-                        (*_buffer)[i - shift] = (*_buffer)[i];
-                }
-                for (int i = 0; i < shift; i++)
-                {
-                        _buffer->pop_back();
-                }
-                return shift;
-        }
+    return _head;
+}
 
-        return 0;
+int AUDIOBUFFER::GetSize()
+{
+    return (int) _buffer->size();
 }
 
 void AUDIOBUFFER::Print()
@@ -70,7 +56,6 @@ void AUDIOBUFFER::Print()
     }
     std::cout << "\n";
 }
-
 
 STGRAN2::STGRAN2() : branch(0)
 {

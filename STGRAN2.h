@@ -5,16 +5,17 @@ typedef struct {float waveSampInc; float ampSampInc; float wavePhase; float ampP
 
 class AUDIOBUFFER {
 public:
-        AUDIOBUFFER(int size);
-        ~AUDIOBUFFER();
-        double Get(int index);
-        void Append(double samp);
-        int LimitSize();  // returns the number of grains we have to shift back
-        void Print();
+    AUDIOBUFFER(int size);
+    ~AUDIOBUFFER();
+    double Get(float index);
+    int GetHead();
+    int GetSize();
+    void Append(double samp);
+    void Print();
 
 private:
-        std::vector<double>* _buffer;
-        int _maxSize;
+    int _head;
+    std::vector<double>* _buffer;
 };
 
 class STGRAN2 : public Instrument {
