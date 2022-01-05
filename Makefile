@@ -4,7 +4,7 @@ NAME = SGRAN2
 NAME2 = STGRAN2
 
 OBJS = $(NAME).o
-OBJS2 = $(NAME).o
+OBJS2 = $(NAME2).o
 CMIXOBJS += $(PROFILE_O)
 CXXFLAGS += -I. -Wall 
 PROGS = $(NAME) lib$(NAME).so $(NAME2) lib$(NAME2).so
