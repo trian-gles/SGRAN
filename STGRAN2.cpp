@@ -17,7 +17,7 @@
 // to see at a glance whether you're looking at a local variable or a
 // data member.
 
-AUDIOBUFFER::AUDIOBUFFER(int maxSize): _head(0)
+AUDIOBUFFER::AUDIOBUFFER(int maxSize): _head(0), _full(false)
 {
     _buffer = new std::vector<double>(maxSize);
 }
@@ -30,6 +30,8 @@ AUDIOBUFFER::~AUDIOBUFFER()
 void AUDIOBUFFER::Append(double sample)
 {
     (*_buffer)[_head] = sample;
+    if (_head == (int) _buffer->size() -1)
+	_full = true;
     _head = (_head + 1) % _buffer->size();
 }
 
@@ -46,6 +48,11 @@ int AUDIOBUFFER::GetHead()
 int AUDIOBUFFER::GetSize()
 {
     return (int) _buffer->size();
+}
+
+bool AUDIOBUFFER::GetFull()
+{
+    return _full;
 }
 
 void AUDIOBUFFER::Print()
@@ -72,6 +79,7 @@ STGRAN2::~STGRAN2()
 		delete (*grains)[i];
 	}
 	delete grains;
+	delete buffer;
 }
 
 
@@ -107,19 +115,26 @@ int STGRAN2::init(double p[], int n_args)
 		p17: panMid
 		p18: panHigh
 		p19: panTight
-		p20: wavetable
-		p21: grainEnv
+		p20: grainEnv
 	*/
+	if (rtsetinput(p[0], this) == -1)
+      		return DONT_SCHEDULE; // no input
+
 	if (rtsetoutput(p[0], p[1], this) == -1)
 		return DONT_SCHEDULE;
 
 	if (outputChannels() > 2)
 	      return die("STGRAN2", "Output must be mono or stereo.");
 
-	if (n_args < 22)
+	if (n_args < 21)
 		return die("STGRAN2", "all arguments are required");
+
+	if (inputChannels() > 1)
+		return die("STGRAN2", "Currently only accepting mono input");
+
+	buffer = new AUDIOBUFFER(44100); // figure out different buffer sizes
+
 	grainEnvLen = 0;
-	wavetableLen = 0;
 	amp = p[2];
 
 	grainRate = p[3];
@@ -127,8 +142,7 @@ int STGRAN2::init(double p[], int n_args)
 	grainRateSamps = round(grainRate * SR);
 
 	// init tables
-	wavetable = (double *) getPFieldTable(20, &wavetableLen);
-	grainEnv = (double *) getPFieldTable(21, &grainEnvLen);
+	grainEnv = (double *) getPFieldTable(20, &grainEnvLen);
 
 	// make the needed grains, which have no values yet as they need to be set dynamically
 	grains = new std::vector<Grain*>();
@@ -202,20 +216,33 @@ void STGRAN2::addgrain()
 // set new parameters and turn on an idle grain
 void STGRAN2::resetgrain(Grain* grain)
 {
+
+	if (!buffer->GetFull())
+		return;
+
 	float trans = (float)prob(transLow, transMid, transHigh, transTight);
+	float offset = abs(trans - 1);
 	float grainDurSamps = (float) prob(grainDurLow, grainDurMid, grainDurHigh, grainDurTight) * SR;
+	float sampOffset = grainDurSamps * offset; // how many total samples the grain will deviate from the normal buffer movement
+
+	if (sampOffset > buffer->GetSize() / 2) //can use RAM here
+	{
+		std::cout << "Grain offset too high!" <<"\n";
+		return; // eventually properly handle this
+	}
+
+
 	float panR = (float) prob(panLow, panMid, panHigh, panTight);
-	grain->waveSampInc = wavetableLen * trans / SR;
+	grain->waveSampInc = trans;  // FIX THIS
 	grain->ampSampInc = ((float)grainEnvLen) / grainDurSamps;
-	grain->currTime = 0;
+	grain->currTime = currentFrame() - (int) floor(buffer->GetSize() / 2); // Currently start in the middle of the buffer, eventually choose the optimal place
 	grain->isplaying = true;
 	grain->wavePhase = 0;
 	grain->ampPhase = 0;
 	grain->panR = panR;
 	grain->panL = 1 - panR; // separating these in RAM means fewer sample rate calculations
-	(*grain).dur = (int)round(grainDurSamps);
+	(*grain).dur = (int)round(grainDurSamps) + grain->currTime;
 	//std::cout<<"sending grain with trans : " << trans << " dur : " << grain->dur << " panR " << panR << "\n";
-
 }
 
 void STGRAN2::resetgraincounter()
@@ -271,9 +298,17 @@ int STGRAN2::run()
 {
 	//std::cout<<"new control block"<<"\n";
 	float out[2];
-	for (int i = 0; i < framesToRun(); i++) {
+	int samps = framesToRun();
+
+	if (in == NULL) // first time, we need to allocate the buffer memory
+		in = new float[RTBUFSAMPS*inputChannels()];
+
+	rtgetin(in, this, samps);
+	//int grainsCurrUsed = 0;
+	for (int i = 0; i < samps; i++) {
 		//std::cout<<"running frame "<< currentFrame() << "\n";
-		//int grainsCurrUsed = 0;
+		//grainsCurrUsed = 0;
+		buffer->Append(in[i]);
 		if (--branch <= 0) {doupdate();}
 
 		out[0] = 0;
@@ -296,7 +331,9 @@ int STGRAN2::run()
 				{
 					// at some point, make your own interpolation
 					float grainAmp = oscil(1, currGrain->ampSampInc, grainEnv, grainEnvLen, &((*currGrain).ampPhase));
-					float grainOut = oscil(grainAmp,currGrain->waveSampInc, wavetable, wavetableLen, &((*currGrain).wavePhase));
+					float grainOut = grainAmp * buffer->Get(currGrain->wavePhase);
+					currGrain->wavePhase += currGrain -> waveSampInc;
+
 					out[0] += grainOut * currGrain->panL;
 					out[1] += grainOut * currGrain->panR;
 					//grainsCurrUsed++;
@@ -311,13 +348,14 @@ int STGRAN2::run()
 				resetgraincounter();
 			}
 		}
-		//std::cout<<"total curr grains : "<<totalCurrGrains<<"\n";
+
 		//std::cout<<"left output before amp: " << out[0] << "\n";
 
 		// if all current grains are occupied, we skip this request for a new grain
 		if (newGrainCounter == 0)
 		{
 			resetgraincounter();
+			//std::cout << "skipping grain request" << "\n";
 		}
 
 		out[0] *= amp;
@@ -327,7 +365,7 @@ int STGRAN2::run()
 		increment();
 		//grainsUsed = std::max(grainsUsed, grainsCurrUsed);
 	}
-
+	//std::cout<<"total curr grains : "<<grainsCurrUsed<<"\n";
 	// Return the number of frames we processed.
 
 	return framesToRun();

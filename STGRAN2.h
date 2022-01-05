@@ -10,10 +10,12 @@ public:
     double Get(float index);
     int GetHead();
     int GetSize();
+    bool GetFull();
     void Append(double samp);
     void Print();
 
 private:
+    bool _full;
     int _head;
     std::vector<double>* _buffer;
 };
@@ -34,6 +36,9 @@ public:
 
 private:
 	int branch;
+
+	AUDIOBUFFER* buffer;
+	float* in;
 
 	double transLow;
 	double transMid;
@@ -62,8 +67,6 @@ private:
 	double grainRateVarTight;
 
 	int grainsRequired;
-	double* wavetable;
-	int wavetableLen;
 	double* grainEnv;
 	int grainEnvLen;
 	float grainRate;
