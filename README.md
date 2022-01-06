@@ -13,7 +13,6 @@ https://user-images.githubusercontent.com/69212477/147691891-53d72308-b080-4f00-
 
 https://user-images.githubusercontent.com/69212477/148407993-227b08c9-a545-46cc-b253-875c567a8963.mp4
 
-
 https://user-images.githubusercontent.com/69212477/148408034-002d62c7-b3ef-4b4c-9067-4aa3a63c321d.mp4
 
 
@@ -21,6 +20,8 @@ https://user-images.githubusercontent.com/69212477/148408034-002d62c7-b3ef-4b4c-
 ## Usage
 
 Make sure the package.conf points to the appropriate RTcmix makefile.conf before building, then `make`
+
+See the included scorefiles for example usage
 
 ### SGRAN2
 
