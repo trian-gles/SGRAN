@@ -19,10 +19,10 @@ load("./libSTGRAN2.so")
                 p9: grainDurMid
                 p10: grainDurHigh
                 p11: grainDurTight
-                p12: freqLow (Hz)
-                p13: freqMid
-                p14: freqHigh
-                p15: freqTight
+                p12: transLow (semitones)
+                p13: transMid (semitones)
+                p14: transHigh (semitones)
+                p15: transTight
 		p16: panLow (0 - 1.0)
 		p17: panMid
 		p18: panHigh
@@ -38,11 +38,11 @@ amp = maketable("line", 1000, 0, 0, 1, 1, 20, 1, 21, 0)
 
 STGRAN2(0, 20, 6 * amp, 
 //grain rate
-.001, 0.1, 3, 10, 4, 
+.001, 0.1, 3, 10, 0.1, 
 //grain dur
-0.2, 0.5, 0.8, 0.1, 
+0.08, 0.2, 0.62, 0.1, 
 //trans
-.5, 1, 1.5, 0.2, 
+-2, 0, 2, 0.1, 
 //pan
 0, 0.5, 1, 0.4,
 //wavetables

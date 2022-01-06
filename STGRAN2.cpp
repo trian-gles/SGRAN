@@ -92,7 +92,7 @@ STGRAN2::~STGRAN2()
 // call warn() or rterror() with a message.
 
 int STGRAN2::init(double p[], int n_args)
-{		// store this for use in doupdate()
+{
 
 	/* Args:
 		p0: inskip
@@ -107,7 +107,7 @@ int STGRAN2::init(double p[], int n_args)
 		p9: grainDurMid
 		p10: grainDurHigh
 		p11: grainDurTight
-		p12: transLow
+		p12: transLow (cents)
 		p13: transMid
 		p14: transHigh
 		p15: transTight
@@ -221,27 +221,34 @@ void STGRAN2::resetgrain(Grain* grain)
 		return;
 
 	float trans = (float)prob(transLow, transMid, transHigh, transTight);
-	float offset = abs(trans - 1);
+	float rate = pow(2, trans / 12);
+	float offset = rate - 1;
 	float grainDurSamps = (float) prob(grainDurLow, grainDurMid, grainDurHigh, grainDurTight) * SR;
 	float sampOffset = grainDurSamps * offset; // how many total samples the grain will deviate from the normal buffer movement
 
-	if (sampOffset > buffer->GetSize() / 2) //can use RAM here
+	grain->currTime = currentFrame() - (int) floor(buffer->GetSize() / 2);
+
+
+	if (abs(sampOffset) > buffer->GetSize()) // this grain cannot exist with size of the buffer
 	{
 		std::cout << "Grain offset too high!" <<"\n";
-		return; // eventually properly handle this
+		return;
+	}
+	else if (abs(sampOffset) > buffer->GetSize() / 2)  // we can make this grain fit by starting it earlier or later
+	{
+		grain->currTime -= sampOffset;
 	}
 
-
 	float panR = (float) prob(panLow, panMid, panHigh, panTight);
-	grain->waveSampInc = trans;  // FIX THIS
+	grain->waveSampInc = rate;
 	grain->ampSampInc = ((float)grainEnvLen) / grainDurSamps;
-	grain->currTime = currentFrame() - (int) floor(buffer->GetSize() / 2); // Currently start in the middle of the buffer, eventually choose the optimal place
+
 	grain->isplaying = true;
 	grain->wavePhase = 0;
 	grain->ampPhase = 0;
 	grain->panR = panR;
 	grain->panL = 1 - panR; // separating these in RAM means fewer sample rate calculations
-	(*grain).dur = (int)round(grainDurSamps) + grain->currTime;
+	grain->dur = (int)round(grainDurSamps) + grain->currTime;
 	//std::cout<<"sending grain with trans : " << trans << " dur : " << grain->dur << " panR " << panR << "\n";
 }
 
