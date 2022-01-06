@@ -162,7 +162,7 @@ void SGRAN2::addgrain()
 // set new parameters and turn on an idle grain
 void SGRAN2::resetgrain(Grain* grain)
 {
-	float freq = (float)prob(freqLow, freqMid, freqHigh, freqTight);
+	float freq = cpsmidi((float)prob(midicps(freqLow), midicps(freqMid), midicps(freqHigh), freqTight));
 	float grainDurSamps = (float) prob(grainDurLow, grainDurMid, grainDurHigh, grainDurTight) * SR;
 	float panR = (float) prob(panLow, panMid, panHigh, panTight);
 	grain->waveSampInc = wavetableLen * freq / SR;
