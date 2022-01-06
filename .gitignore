@@ -1,7 +1,6 @@
-synth.wav
+*.wav
+clar.aiff
 SGRAN2.o
 STGRAN2.o
 libSGRAN2.so
 libSTGRAN2.so
-coolsound.wav
-test.wav
