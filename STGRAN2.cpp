@@ -226,7 +226,7 @@ void STGRAN2::resetgrain(Grain* grain)
 	float grainDurSamps = (float) prob(grainDurLow, grainDurMid, grainDurHigh, grainDurTight) * SR;
 	float sampOffset = grainDurSamps * offset; // how many total samples the grain will deviate from the normal buffer movement
 
-	grain->currTime = currentFrame() - (int) floor(buffer->GetSize() / 2);
+	grain->currTime = buffer->GetHead() + currentFrame() - (int) floor(buffer->GetSize() / 2);
 
 
 	if (abs(sampOffset) > buffer->GetSize()) // this grain cannot exist with size of the buffer
