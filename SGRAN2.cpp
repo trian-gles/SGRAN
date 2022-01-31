@@ -5,28 +5,20 @@
 #include <algorithm>
 #include <PField.h>
 #include <Instrument.h>
-#include "SGRAN2.h"			  // declarations for this instrument class
+#include "SGRAN2.h"			 
 #include <rt.h>
 #include <rtdefs.h>
 #include <iostream>
 #include <vector>
-
-// Construct an instance of this instrument and initialize some variables.
-// Using an underbar as the first character of a data member is a nice
-// convention to follow, but it's not necessary, of course.  It helps you
-// to see at a glance whether you're looking at a local variable or a
-// data member.
 
 SGRAN2::SGRAN2() : branch(0)
 {
 }
 
 
-// Destruct an instance of this instrument, freeing any memory you've allocated.
 
 SGRAN2::~SGRAN2()
 {
-	//std::cout << " grains used " << grainsUsed << "\n";
 	for (size_t i = 0; i < grains->size(); i++)
 	{
 		delete (*grains)[i];
@@ -35,16 +27,8 @@ SGRAN2::~SGRAN2()
 }
 
 
-// Called by the scheduler to initialize the instrument. Things done here:
-//   - read, store and check pfields
-//   - set output file (or bus) pointer
-//   - init instrument-specific things
-// If there's an error here (like invalid pfields), call and return die() to
-// report the error.  If you just want to warn the user and keep going,
-// call warn() or rterror() with a message.
-
 int SGRAN2::init(double p[], int n_args)
-{		// store this for use in doupdate()
+{
 
 	/* Args:
 		p0: inskip
@@ -103,21 +87,10 @@ int SGRAN2::init(double p[], int n_args)
 
 
 
-// For non-interactive (script-driven) sessions, the constructor and init()
-// for every instrument in the script are called before any of them runs.
-// By contrast, configure() is called right before the instrument begins
-// playing.  If we were to allocate memory at init time, then all notes in
-// the score would allocate memory then, resulting in a potentially excessive
-// memory footprint.  So this is the place to allocate any substantial amounts
-// of memory you might be using.
-
 int SGRAN2::configure()
 {
 	return 0;	// IMPORTANT: Return 0 on success, and -1 on failure.
 }
-// void addgrain(float sampInc; float freq; float dur; float pan; bool isplaying;);
-//        void resetgrsain(Grain* grain);
-//        int calcgrainsrequired();
 
 double SGRAN2::prob(double low,double mid,double high,double tight)
         // Returns a value within a range close to a preferred value
@@ -218,30 +191,21 @@ void SGRAN2::doupdate()
 	panMid = (double)p[17]; if (panMid < panLow) panMid = panLow;
 	panHigh = (double)p[18]; if (panHigh < panMid) panHigh = panMid;
 	panTight = (double)p[19];
-	//std::cout<<"updating amp to " << amp << "\n";
 
 	grainsRequired = calcgrainsrequired();
 	amp /= grainsRequired;
 
 }
 
-// Called by the scheduler for every time slice in which this instrument
-// should run.  This is where the real work of the instrument is done.
+
 int SGRAN2::run()
 {
-	//std::cout<<"new control block"<<"\n";
 	float out[2];
 	for (int i = 0; i < framesToRun(); i++) {
-		//std::cout<<"running frame "<< currentFrame() << "\n";
-		//int grainsCurrUsed = 0;
 		if (--branch <= 0) {doupdate();}
 
 		out[0] = 0;
 		out[1] = 0;
-		//if ((newGrainCounter == 0))
-		//{
-		//	std::cout<<"we need a new grain!\n";
-		//}
 		for (size_t j = 0; j < grains->size(); j++)
 		{
 			Grain* currGrain = (*grains)[j];
@@ -250,29 +214,28 @@ int SGRAN2::run()
 				if (++(*currGrain).currTime > currGrain->dur)
 				{
 					currGrain->isplaying = false;
-					// std::cout<<"turning off grain \n";
 				}
 				else
 				{
-					// at some point, make your own interpolation
+					// should include an interpolation option at some point
 					float grainAmp = oscil(1, currGrain->ampSampInc, grainEnv, grainEnvLen, &((*currGrain).ampPhase));
 					float grainOut = oscil(grainAmp,currGrain->waveSampInc, wavetable, wavetableLen, &((*currGrain).wavePhase));
 					out[0] += grainOut * currGrain->panL;
 					out[1] += grainOut * currGrain->panR;
-					//grainsCurrUsed++;
 				}
 			}
 			// this is not an else statement so a grain can be potentially stopped and restarted on the same frame
 
 			if ((newGrainCounter == 0) && !currGrain->isplaying)
 			{
-				// std::cout<<"resetting grain \n";
-				resetgrain(currGrain);
 				resetgraincounter();
+				if (newGrainCounter > 0) // we don't allow two grains to be create o
+					{resetgrain(currGrain);}
+				else
+					{newGrainCounter = 1;}
+
 			}
 		}
-		//std::cout<<"total curr grains : "<<totalCurrGrains<<"\n";
-		//std::cout<<"left output before amp: " << out[0] << "\n";
 
 		// if all current grains are occupied, we skip this request for a new grain
 		if (newGrainCounter == 0)
@@ -285,7 +248,6 @@ int SGRAN2::run()
 		rtaddout(out);
 		newGrainCounter--;
 		increment();
-		//grainsUsed = std::max(grainsUsed, grainsCurrUsed);
 	}
 
 	// Return the number of frames we processed.
@@ -294,10 +256,6 @@ int SGRAN2::run()
 }
 
 
-// The scheduler calls this to create an instance of this instrument
-// and to set up the bus-routing fields in the base Instrument class.
-// This happens for every "note" in a score.
-
 Instrument *makeSGRAN2()
 {
 	SGRAN2 *inst = new SGRAN2();
@@ -305,11 +263,6 @@ Instrument *makeSGRAN2()
 
 	return inst;
 }
-
-
-// The rtprofile introduces this instrument to the RTcmix core, and
-// associates a script function name (in quotes below) with the instrument.
-// This is the name the instrument goes by in a script.
 
 void rtprofile()
 {
