@@ -343,8 +343,12 @@ int STGRAN2::run()
 
 			if ((newGrainCounter == 0) && !currGrain->isplaying)
 			{
-				resetgrain(currGrain);
 				resetgraincounter();
+				if (newGrainCounter > 0) // we don't allow two grains to be created on the same frame
+					{resetgrain(currGrain);}
+				else
+					{newGrainCounter = 1;}
+
 			}
 		}
 
