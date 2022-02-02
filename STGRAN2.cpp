@@ -396,9 +396,10 @@ Instrument *makeSTGRAN2()
 // associates a script function name (in quotes below) with the instrument.
 // This is the name the instrument goes by in a script.
 
+#ifndef EMBEDDED
 void rtprofile()
 {
 	RT_INTRO("STGRAN2", makeSTGRAN2);
 }
-
+#endif
 

@@ -264,9 +264,10 @@ Instrument *makeSGRAN2()
 	return inst;
 }
 
+#ifndef EMBEDDED
 void rtprofile()
 {
 	RT_INTRO("SGRAN2", makeSGRAN2);
 }
-
+#endif
 
