@@ -1,7 +1,7 @@
 #include <Ougens.h>
 #include <vector>
 		  // the base class for this instrument
-typedef struct {float waveSampInc; float ampSampInc; float wavePhase; float ampPhase; int dur; float panR; float panL; int currTime; bool isplaying;} Grain;
+typedef struct {float waveSampInc; float ampSampInc; float currTime; float ampPhase; float endTime; float panR; float panL; bool isplaying;} Grain;
 
 class AUDIOBUFFER {
 public:

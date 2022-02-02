@@ -37,7 +37,9 @@ void AUDIOBUFFER::Append(double sample)
 
 double AUDIOBUFFER::Get(float index) // maybe add interpolation at some point
 {
-    return (*_buffer)[(int) floor(index) % _buffer->size()];
+	while (index < 0)
+		index += (float) _buffer->size();
+    return (*_buffer)[(int) index];
 }
 
 int AUDIOBUFFER::GetHead()
@@ -74,6 +76,7 @@ STGRAN2::STGRAN2() : branch(0)
 STGRAN2::~STGRAN2()
 {
 	//std::cout << " grains used " << grainsUsed << "\n";
+
 	for (size_t i = 0; i < grains->size(); i++)
 	{
 		delete (*grains)[i];
@@ -202,9 +205,8 @@ void STGRAN2::addgrain()
 	Grain* newgrain = new Grain();
 	newgrain-> waveSampInc = 0;
 	newgrain-> ampSampInc = 0;
-	newgrain-> wavePhase = 0;
 	newgrain-> ampPhase = 0;
-	newgrain-> dur = 0;
+	newgrain-> endTime = 0;
 	newgrain-> panR = 0;
 	newgrain-> panL = 0;
 	newgrain-> currTime = 0;
@@ -226,7 +228,7 @@ void STGRAN2::resetgrain(Grain* grain)
 	float grainDurSamps = (float) prob(grainDurLow, grainDurMid, grainDurHigh, grainDurTight) * SR;
 	float sampOffset = grainDurSamps * offset; // how many total samples the grain will deviate from the normal buffer movement
 
-	grain->currTime = buffer->GetHead() + currentFrame() - (int) floor(buffer->GetSize() / 2);
+	grain->currTime = buffer->GetHead() - (int) floor(buffer->GetSize() / 2);
 
 
 	if (abs(sampOffset) > buffer->GetSize()) // this grain cannot exist with size of the buffer
@@ -244,12 +246,11 @@ void STGRAN2::resetgrain(Grain* grain)
 	grain->ampSampInc = ((float)grainEnvLen) / grainDurSamps;
 
 	grain->isplaying = true;
-	grain->wavePhase = 0;
 	grain->ampPhase = 0;
 	grain->panR = panR;
 	grain->panL = 1 - panR; // separating these in RAM means fewer sample rate calculations
-	grain->dur = (int)round(grainDurSamps) + grain->currTime;
-	//std::cout<<"sending grain with trans : " << trans << " dur : " << grain->dur << " panR " << panR << "\n";
+	grain->endTime = grainDurSamps + grain->currTime;
+	//std::cout<<"sending grain with start time : "<< grain->currTime << " first sample : " << buffer->Get(grain->currTime) << "\n";
 }
 
 void STGRAN2::resetgraincounter()
@@ -318,13 +319,14 @@ int STGRAN2::run()
 
 		out[0] = 0;
 		out[1] = 0;
+		
 
 		for (size_t j = 0; j < grains->size(); j++)
 		{
 			Grain* currGrain = (*grains)[j];
 			if (currGrain->isplaying)
 			{
-				if (++(*currGrain).currTime > currGrain->dur)
+				if ((*currGrain).currTime > currGrain->endTime)
 				{
 					currGrain->isplaying = false;
 				}
@@ -332,8 +334,8 @@ int STGRAN2::run()
 				{
 					// at some point, make your own interpolation
 					float grainAmp = oscil(1, currGrain->ampSampInc, grainEnv, grainEnvLen, &((*currGrain).ampPhase));
-					float grainOut = grainAmp * buffer->Get(currGrain->wavePhase);
-					currGrain->wavePhase += currGrain -> waveSampInc;
+					float grainOut = grainAmp * buffer->Get(currGrain->currTime);
+					currGrain->currTime += currGrain->waveSampInc;
 
 					out[0] += grainOut * currGrain->panL;
 					out[1] += grainOut * currGrain->panR;
