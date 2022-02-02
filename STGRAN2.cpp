@@ -292,10 +292,10 @@ void STGRAN2::doupdate()
 	panMid = (double)p[17]; if (panMid < panLow) panMid = panLow;
 	panHigh = (double)p[18]; if (panHigh < panMid) panHigh = panMid;
 	panTight = (double)p[19];
-	//std::cout<<"updating amp to " << amp << "\n";
 
-	grainsRequired = calcgrainsrequired();
-	amp /= grainsRequired;
+	// This needs to be redone at some point maybe
+	// grainsRequired = calcgrainsrequired();
+	// amp /= grainsRequired;
 
 }
 
@@ -313,17 +313,12 @@ int STGRAN2::run()
 	rtgetin(in, this, samps);
 	//int grainsCurrUsed = 0;
 	for (int i = 0; i < samps; i++) {
-		//std::cout<<"running frame "<< currentFrame() << "\n";
-		//grainsCurrUsed = 0;
 		buffer->Append(in[i]);
 		if (--branch <= 0) {doupdate();}
 
 		out[0] = 0;
 		out[1] = 0;
-		//if ((newGrainCounter == 0))
-		//{
-		//	std::cout<<"we need a new grain!\n";
-		//}
+
 		for (size_t j = 0; j < grains->size(); j++)
 		{
 			Grain* currGrain = (*grains)[j];
@@ -332,7 +327,6 @@ int STGRAN2::run()
 				if (++(*currGrain).currTime > currGrain->dur)
 				{
 					currGrain->isplaying = false;
-					// std::cout<<"turning off grain \n";
 				}
 				else
 				{
@@ -343,20 +337,16 @@ int STGRAN2::run()
 
 					out[0] += grainOut * currGrain->panL;
 					out[1] += grainOut * currGrain->panR;
-					//grainsCurrUsed++;
 				}
 			}
 			// this is not an else statement so a grain can be potentially stopped and restarted on the same frame
 
 			if ((newGrainCounter == 0) && !currGrain->isplaying)
 			{
-				// std::cout<<"resetting grain \n";
 				resetgrain(currGrain);
 				resetgraincounter();
 			}
 		}
-
-		//std::cout<<"left output before amp: " << out[0] << "\n";
 
 		// if all current grains are occupied, we skip this request for a new grain
 		if (newGrainCounter == 0)
@@ -370,11 +360,7 @@ int STGRAN2::run()
 		rtaddout(out);
 		newGrainCounter--;
 		increment();
-		//grainsUsed = std::max(grainsUsed, grainsCurrUsed);
 	}
-	//std::cout<<"total curr grains : "<<grainsCurrUsed<<"\n";
-	// Return the number of frames we processed.
-
 	return framesToRun();
 }
 

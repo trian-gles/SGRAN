@@ -45,7 +45,7 @@ translo = maketable("line", "nonorm", 1000, 0, -2, 1, -14)
 transhi = maketable("line", "nonorm", 1000, 0, 2, 1, 14)
 transtight = maketable("line", "nonorm", 1000, 0, 2, 1, 0.1)
 
-STGRAN2(0, 20, 6 * amp, 
+STGRAN2(0, 20, 0.125 * amp, 
 //grain rate
 .0005, 0.1, 3, 10, 0.1, 
 //grain dur

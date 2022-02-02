@@ -1,5 +1,4 @@
 rtsetparams(44100, 2)
-rtoutput("ex2.wav")
 load("./libSGRAN2.so")
 
         /* Args:
@@ -56,7 +55,7 @@ pan_high = maketable("line", "nonorm", 200, 0, 0.2, 1, 0.5, 2, 1)
 
 pan_tight = 0.4
 
-SGRAN2(0, 25, 200000 * amp, 
+SGRAN2(0, 25, 800 * amp, 
 //grain rate
 1, rate_low, rate_mid, rate_high, rate_tight, 
 //grain dur

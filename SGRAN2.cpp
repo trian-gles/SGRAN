@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <PField.h>
 #include <Instrument.h>
-#include "SGRAN2.h"			 
+#include "SGRAN2.h"
 #include <rt.h>
 #include <rtdefs.h>
 #include <iostream>
@@ -156,7 +156,7 @@ void SGRAN2::resetgraincounter()
 	newGrainCounter = (int)round(grainRateSamps * prob(grainRateVarLow, grainRateVarMid, grainRateVarHigh, grainRateVarTight));
 }
 
-// determine the maximum grains we need total
+// determine the maximum grains we need total.  Needs to be redone using ZE CALCULUS
 int SGRAN2::calcgrainsrequired()
 {
 	return ceil(grainDurMid / (grainRateVarMid * grainRate)) + 1;
@@ -192,8 +192,9 @@ void SGRAN2::doupdate()
 	panHigh = (double)p[18]; if (panHigh < panMid) panHigh = panMid;
 	panTight = (double)p[19];
 
-	grainsRequired = calcgrainsrequired();
-	amp /= grainsRequired;
+	// Ouput amplitude will eventually be adjusted here
+	// grainsRequired = calcgrainsrequired();
+	// amp /= grainsRequired;
 
 }
 

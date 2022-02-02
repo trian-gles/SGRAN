@@ -34,7 +34,7 @@ wave = maketable("wave", 1000, "saw")
 env = src_env = maketable("window", 1000, "hanning")
 amp = maketable("line", 1000, 0, 0, 1, 1, 2, 0)
 
-SGRAN2(0, 10, 150000 * amp, 
+SGRAN2(0, 10, 800 * amp, 
 //grain rate
 0.01, 0.004, 0.008, 0.04, 4, 
 //grain dur
