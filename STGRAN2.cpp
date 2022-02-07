@@ -39,6 +39,8 @@ double AUDIOBUFFER::Get(float index) // maybe add interpolation at some point
 {
 	while (index < 0)
 		index += (float) _buffer->size();
+	while (index > _buffer->size())
+		index -= (float) _buffer->size();
     return (*_buffer)[(int) index];
 }
 
@@ -336,7 +338,7 @@ int STGRAN2::run()
 					float grainAmp = oscil(1, currGrain->ampSampInc, grainEnv, grainEnvLen, &((*currGrain).ampPhase));
 					float grainOut = grainAmp * buffer->Get(currGrain->currTime);
 					currGrain->currTime += currGrain->waveSampInc;
-
+					// std::cout<<" outputing grain " << grainAmp << "\n";
 					out[0] += grainOut * currGrain->panL;
 					out[1] += grainOut * currGrain->panR;
 				}
