@@ -54,6 +54,16 @@ int SGRAN2::init(double p[], int n_args)
 		p20: wavetable
 		p21: grainEnv
 	*/
+
+	// make the needed grains, which have no values yet as they need to be set dynamically
+	grains = new std::vector<Grain*>();
+	// maybe make the maximum grain value a non-pfield enabled parameter
+	for (int i = 0; i < 1500; i++)
+	{
+		addgrain();
+	}
+
+
 	if (rtsetoutput(p[0], p[1], this) == -1)
 		return DONT_SCHEDULE;
 
@@ -74,15 +84,8 @@ int SGRAN2::init(double p[], int n_args)
 	wavetable = (double *) getPFieldTable(20, &wavetableLen);
 	grainEnv = (double *) getPFieldTable(21, &grainEnvLen);
 
-	// make the needed grains, which have no values yet as they need to be set dynamically
-	grains = new std::vector<Grain*>();
-	// maybe make the maximum grain value a non-pfield enabled parameter
-	for (int i = 0; i < 1500; i++)
-	{
-		addgrain();
-	}
-
 	return nSamps();
+
 }
 
 

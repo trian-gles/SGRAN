@@ -122,6 +122,18 @@ int STGRAN2::init(double p[], int n_args)
 		p19: panTight
 		p20: grainEnv
 	*/
+
+	// make the needed grains, which have no values yet as they need to be set dynamically
+	grains = new std::vector<Grain*>();
+	// maybe make the maximum grain value a non-pfield enabled parameter
+	for (int i = 0; i < 1500; i++)
+	{
+		addgrain();
+	}
+
+	buffer = new AUDIOBUFFER(44100); // figure out different buffer sizes
+
+
 	if (rtsetinput(p[0], this) == -1)
       		return DONT_SCHEDULE; // no input
 
@@ -137,8 +149,6 @@ int STGRAN2::init(double p[], int n_args)
 	if (inputChannels() > 1)
 		return die("STGRAN2", "Currently only accepting mono input");
 
-	buffer = new AUDIOBUFFER(44100); // figure out different buffer sizes
-
 	grainEnvLen = 0;
 	amp = p[2];
 
@@ -149,13 +159,6 @@ int STGRAN2::init(double p[], int n_args)
 	// init tables
 	grainEnv = (double *) getPFieldTable(20, &grainEnvLen);
 
-	// make the needed grains, which have no values yet as they need to be set dynamically
-	grains = new std::vector<Grain*>();
-	// maybe make the maximum grain value a non-pfield enabled parameter
-	for (int i = 0; i < 1500; i++)
-	{
-		addgrain();
-	}
 
 	return nSamps();
 }
