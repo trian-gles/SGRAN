@@ -19,6 +19,8 @@ SGRAN2::SGRAN2() : branch(0)
 
 SGRAN2::~SGRAN2()
 {
+	if (!configured)
+		return;
 	for (size_t i = 0; i < grains->size(); i++)
 	{
 		delete (*grains)[i];
@@ -55,15 +57,6 @@ int SGRAN2::init(double p[], int n_args)
 		p21: grainEnv
 	*/
 
-	// make the needed grains, which have no values yet as they need to be set dynamically
-	grains = new std::vector<Grain*>();
-	// maybe make the maximum grain value a non-pfield enabled parameter
-	for (int i = 0; i < 1500; i++)
-	{
-		addgrain();
-	}
-
-
 	if (rtsetoutput(p[0], p[1], this) == -1)
 		return DONT_SCHEDULE;
 
@@ -92,6 +85,17 @@ int SGRAN2::init(double p[], int n_args)
 
 int SGRAN2::configure()
 {
+	// make the needed grains, which have no values yet as they need to be set dynamically
+	grains = new std::vector<Grain*>();
+	// maybe make the maximum grain value a non-pfield enabled parameter
+
+	for (int i = 0; i < 1500; i++)
+	{
+		addgrain();
+	}
+
+	configured = true;
+
 	return 0;	// IMPORTANT: Return 0 on success, and -1 on failure.
 }
 
@@ -206,7 +210,11 @@ int SGRAN2::run()
 {
 	float out[2];
 	for (int i = 0; i < framesToRun(); i++) {
-		if (--branch <= 0) {doupdate();}
+		if (--branch <= 0)
+		{
+		doupdate();
+		branch = getSkip();
+		}
 
 		out[0] = 0;
 		out[1] = 0;

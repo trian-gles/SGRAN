@@ -78,13 +78,15 @@ STGRAN2::STGRAN2() : branch(0)
 STGRAN2::~STGRAN2()
 {
 	//std::cout << " grains used " << grainsUsed << "\n";
-
+	if (!configured)
+		return;
 	for (size_t i = 0; i < grains->size(); i++)
 	{
 		delete (*grains)[i];
 	}
 	delete grains;
 	delete buffer;
+	delete in;
 }
 
 
@@ -123,17 +125,6 @@ int STGRAN2::init(double p[], int n_args)
 		p20: grainEnv
 	*/
 
-	// make the needed grains, which have no values yet as they need to be set dynamically
-	grains = new std::vector<Grain*>();
-	// maybe make the maximum grain value a non-pfield enabled parameter
-	for (int i = 0; i < 1500; i++)
-	{
-		addgrain();
-	}
-
-	buffer = new AUDIOBUFFER(44100); // figure out different buffer sizes
-
-
 	if (rtsetinput(p[0], this) == -1)
       		return DONT_SCHEDULE; // no input
 
@@ -147,7 +138,7 @@ int STGRAN2::init(double p[], int n_args)
 		return die("STGRAN2", "all arguments are required");
 
 	if (inputChannels() > 1)
-		return die("STGRAN2", "Currently only accepting mono input");
+		rtcmix_advise("STGRAN2", "Only the first input channel will be used");
 
 	grainEnvLen = 0;
 	amp = p[2];
@@ -175,6 +166,20 @@ int STGRAN2::init(double p[], int n_args)
 
 int STGRAN2::configure()
 {
+	// make the needed grains, which have no values yet as they need to be set dynamically
+	grains = new std::vector<Grain*>();
+	// maybe make the maximum grain value a non-pfield enabled parameter
+	for (int i = 0; i < 1500; i++)
+	{
+		addgrain();
+	}
+
+	buffer = new AUDIOBUFFER(44100); // figure out different buffer sizes
+
+	in = new float[RTBUFSAMPS*inputChannels()];
+
+	configured = true;
+
 	return 0;	// IMPORTANT: Return 0 on success, and -1 on failure.
 }
 // void addgrain(float sampInc; float trans; float dur; float pan; bool isplaying;);
@@ -188,7 +193,6 @@ double STGRAN2::prob(double low,double mid,double high,double tight)
                       //              2+amount closeness to mid
                       //              no negative allowed
 {
-	int repeat;
 	double range, num, sign;
 
 	range = (high-mid) > (mid-low) ? high-mid : mid-low;
@@ -311,20 +315,20 @@ int STGRAN2::run()
 {
 	//std::cout<<"new control block"<<"\n";
 	float out[2];
-	int samps = framesToRun();
-
-	if (in == NULL) // first time, we need to allocate the buffer memory
-		in = new float[RTBUFSAMPS*inputChannels()];
+	int samps = framesToRun() * inputChannels();
 
 	rtgetin(in, this, samps);
 	//int grainsCurrUsed = 0;
-	for (int i = 0; i < samps; i++) {
-		buffer->Append(in[i]);
-		if (--branch <= 0) {doupdate();}
+	for (int i = 0; i < samps; i += inputChannels()) {
+		buffer->Append(in[i]); // currently only takes the left input
+		if (--branch <= 0)
+		{
+			doupdate();
+			branch = getSkip();
+		}
 
 		out[0] = 0;
 		out[1] = 0;
-		
 
 		for (size_t j = 0; j < grains->size(); j++)
 		{

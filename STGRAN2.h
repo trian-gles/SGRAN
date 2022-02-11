@@ -37,6 +37,7 @@ public:
 private:
 	int branch;
 
+	bool configured;
 	AUDIOBUFFER* buffer;
 	float* in;
 

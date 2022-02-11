@@ -19,6 +19,7 @@ public:
 	int calcgrainsrequired();
 
 private:
+	bool configured;
 	int branch;
 
 	double freqLow;
