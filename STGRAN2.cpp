@@ -239,7 +239,6 @@ void STGRAN2::resetgrain(Grain* grain)
 
 	grain->currTime = buffer->GetHead() - (int) floor(buffer->GetSize() / 2);
 
-
 	if (abs(sampOffset) > buffer->GetSize()) // this grain cannot exist with size of the buffer
 	{
 		std::cout << "Grain offset too high!" <<"\n";
@@ -247,7 +246,12 @@ void STGRAN2::resetgrain(Grain* grain)
 	}
 	else if (abs(sampOffset) > buffer->GetSize() / 2)  // we can make this grain fit by starting it earlier or later
 	{
-		grain->currTime -= sampOffset;
+		float adjustment = abs(sampOffset) - buffer->GetSize() / 2;
+		if (sampOffset < 0)
+			adjustment *= -1;
+
+		//std::cout << "Adjusting grain start"<<"\n";
+		grain->currTime -= adjustment;
 	}
 
 	float panR = (float) prob(panLow, panMid, panHigh, panTight);
