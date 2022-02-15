@@ -258,7 +258,7 @@ void STGRAN2::resetgrain(Grain* grain)
 	grain->ampPhase = 0;
 	grain->panR = panR;
 	grain->panL = 1 - panR; // separating these in RAM means fewer sample rate calculations
-	grain->endTime = grainDurSamps + grain->currTime;
+	grain->endTime = grainDurSamps * rate + grain->currTime;
 	//std::cout<<"sending grain with start time : "<< grain->currTime << " first sample : " << buffer->Get(grain->currTime) << "\n";
 }
 
