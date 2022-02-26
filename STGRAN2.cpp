@@ -235,25 +235,34 @@ void STGRAN2::resetgrain(Grain* grain)
 	float rate = pow(2, trans / 12);
 	float offset = rate - 1;
 	float grainDurSamps = (float) prob(grainDurLow, grainDurMid, grainDurHigh, grainDurTight) * SR;
-	float sampOffset = grainDurSamps * offset; // how many total samples the grain will deviate from the normal buffer movement
+	int sampOffset = (int) round(abs(grainDurSamps * offset)); // how many total samples the grain will deviate from the normal buffer movement
+	
+	
 
-	grain->currTime = buffer->GetHead() - (int) floor(buffer->GetSize() / 2);
 
-	if (abs(sampOffset) > buffer->GetSize()) // this grain cannot exist with size of the buffer
+	if (sampOffset > buffer->GetSize()) // this grain cannot exist with size of the buffer
 	{
 		std::cout << "Grain offset too high!" <<"\n";
 		return;
 	}
-	else if (abs(sampOffset) > buffer->GetSize() / 2)  // we can make this grain fit by starting it earlier or later
-	{
-		float adjustment = abs(sampOffset) - buffer->GetSize() / 2;
-		if (sampOffset < 0)
-			adjustment *= -1;
 
-		//std::cout << "Adjusting grain start"<<"\n";
-		grain->currTime -= adjustment;
+	int minShift;
+	int maxShift;
+
+	if (rate < 0)
+	{
+		maxShift = buffer->GetSize();
+		minShift = sampOffset;
+	}
+	else
+	{
+		minShift = 1;
+		maxShift = buffer->GetSize() - sampOffset;
 	}
 
+
+	grain->currTime = buffer->GetHead() - (rand() % (maxShift - minShift) + minShift);
+	
 	float panR = (float) prob(panLow, panMid, panHigh, panTight);
 	grain->waveSampInc = rate;
 	grain->ampSampInc = ((float)grainEnvLen) / grainDurSamps;
