@@ -67,7 +67,6 @@ private:
 	double grainRateVarHigh;
 	double grainRateVarTight;
 
-	int grainsRequired;
 	double* grainEnv;
 	int grainEnvLen;
 	float grainRate;

@@ -106,7 +106,6 @@ double SGRAN2::prob(double low,double mid,double high,double tight)
                       //              2+amount closeness to mid
                       //              no negative allowed
 {
-	int repeat;
 	double range, num, sign;
 
 	range = (high-mid) > (mid-low) ? high-mid : mid-low;

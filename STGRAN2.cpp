@@ -17,7 +17,7 @@
 // to see at a glance whether you're looking at a local variable or a
 // data member.
 
-AUDIOBUFFER::AUDIOBUFFER(int maxSize): _head(0), _full(false)
+AUDIOBUFFER::AUDIOBUFFER(int maxSize): _full(false), _head(0)
 {
     _buffer = new std::vector<double>(maxSize);
 }
@@ -68,7 +68,7 @@ void AUDIOBUFFER::Print()
     std::cout << "\n";
 }
 
-STGRAN2::STGRAN2() : branch(0)
+STGRAN2::STGRAN2() : branch(0), configured(false)
 {
 }
 
