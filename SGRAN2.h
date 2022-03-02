@@ -19,13 +19,13 @@ public:
 	int calcgrainsrequired();
 
 private:
-	bool configured;
-	int branch;
+	bool _configured;
+	int _branch;
 
-	double freqLow;
-	double freqMid;
-	double freqHigh;
-	double freqTight;
+	double _freqLow;
+	double _freqMid;
+	double _freqHigh;
+	double _freqTight;
 
 	double grainDurLow;
 	double grainDurMid;

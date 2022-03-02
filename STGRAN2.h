@@ -10,6 +10,8 @@ public:
     double Get(float index);
     int GetHead();
     int GetSize();
+	void SetSize(int size);
+	int GetMaxSize();
     bool GetFull();
     void Append(double samp);
     void Print();
@@ -17,6 +19,7 @@ public:
 private:
     bool _full;
     int _head;
+	int _size;
     std::vector<double>* _buffer;
 };
 
@@ -35,11 +38,13 @@ public:
 	int calcgrainsrequired();
 
 private:
+	int _nargs;
 	int branch;
 
 	bool configured;
 	AUDIOBUFFER* buffer;
 	float* in;
+	int bufferBehaviour;
 
 	double transLow;
 	double transMid;

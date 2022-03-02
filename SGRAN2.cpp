@@ -11,7 +11,7 @@
 #include <iostream>
 #include <vector>
 
-SGRAN2::SGRAN2() : branch(0)
+SGRAN2::SGRAN2() : _branch(0)
 {
 }
 
@@ -19,7 +19,7 @@ SGRAN2::SGRAN2() : branch(0)
 
 SGRAN2::~SGRAN2()
 {
-	if (!configured)
+	if (!_configured)
 		return;
 	for (size_t i = 0; i < grains->size(); i++)
 	{
@@ -94,7 +94,7 @@ int SGRAN2::configure()
 		addgrain();
 	}
 
-	configured = true;
+	_configured = true;
 
 	return 0;	// IMPORTANT: Return 0 on success, and -1 on failure.
 }
@@ -141,7 +141,7 @@ void SGRAN2::addgrain()
 // set new parameters and turn on an idle grain
 void SGRAN2::resetgrain(Grain* grain)
 {
-	float freq = cpsmidi((float)prob(midicps(freqLow), midicps(freqMid), midicps(freqHigh), freqTight));
+	float freq = cpsmidi((float)prob(midicps(_freqLow), midicps(_freqMid), midicps(_freqHigh), _freqTight));
 	float grainDurSamps = (float) prob(grainDurLow, grainDurMid, grainDurHigh, grainDurTight) * SR;
 	float panR = (float) prob(panLow, panMid, panHigh, panTight);
 	grain->waveSampInc = wavetableLen * freq / SR;
@@ -187,10 +187,10 @@ void SGRAN2::doupdate()
 	grainRateVarHigh = (double)p[6]; if (grainRateVarHigh < grainRateVarMid) grainRateVarHigh = grainRateVarMid;
 	grainRateVarTight = (double)p[7];
 
-	freqLow = (double)p[12];
-	freqMid = (double)p[13]; if (freqMid < freqLow) freqMid = freqLow;
-	freqHigh = (double)p[14]; if (freqHigh < freqMid) freqHigh = freqMid;
-	freqTight = (double)p[15];
+	_freqLow = (double)p[12];
+	_freqMid = (double)p[13]; if (_freqMid < _freqLow) _freqMid = _freqLow;
+	_freqHigh = (double)p[14]; if (_freqHigh < _freqMid) _freqHigh = _freqMid;
+	_freqTight = (double)p[15];
 
 
 	panLow = (double)p[16];
@@ -209,10 +209,10 @@ int SGRAN2::run()
 {
 	float out[2];
 	for (int i = 0; i < framesToRun(); i++) {
-		if (--branch <= 0)
+		if (--_branch <= 0)
 		{
 		doupdate();
-		branch = getSkip();
+		_branch = getSkip();
 		}
 
 		out[0] = 0;
