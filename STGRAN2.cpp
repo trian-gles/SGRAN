@@ -13,6 +13,7 @@
 #include <vector>
 
 #define MAXBUFFER 44100
+#define MAXGRAINS 1500
 
 // Construct an instance of this instrument and initialize some variables.
 // Using an underbar as the first character of a data member is a nice
@@ -200,9 +201,9 @@ int STGRAN2::configure()
 	// make the needed grains, which have no values yet as they need to be set dynamically
 	grains = new std::vector<Grain*>();
 	// maybe make the maximum grain value a non-pfield enabled parameter
-	for (int i = 0; i < 1500; i++)
+	for (int i = 0; i < MAXGRAINS; i++)
 	{
-		addgrain();
+		grains->push_back(new Grain());
 	}
 
 	buffer = new AUDIOBUFFER(MAXBUFFER);
@@ -234,25 +235,6 @@ double STGRAN2::prob(double low,double mid,double high,double tight)
 	  	num = mid + sign*(pow((rrand()+1.)*.5,tight)*range);
 	} while(num < low || num > high);
 	return(num);
-}
-
-
-void STGRAN2::addgrain()
-{
-	// typedef struct {float waveSampInc; float ampSampInc; float wavePhase; float ampPhase; float dur; float panR; float panL float currTime; bool isplaying;} Grain;
-
-
-	Grain* newgrain = new Grain();
-	newgrain-> waveSampInc = 0;
-	newgrain-> ampSampInc = 0;
-	newgrain-> ampPhase = 0;
-	newgrain-> endTime = 0;
-	newgrain-> panR = 0;
-	newgrain-> panL = 0;
-	newgrain-> currTime = 0;
-	newgrain-> isplaying = false;
-
-	grains->push_back(newgrain);
 }
 
 // set new parameters and turn on an idle grain

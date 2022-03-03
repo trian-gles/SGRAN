@@ -11,6 +11,8 @@
 #include <iostream>
 #include <vector>
 
+#define MAXGRAINS 1500
+
 SGRAN2::SGRAN2() : _branch(0)
 {
 }
@@ -78,7 +80,6 @@ int SGRAN2::init(double p[], int n_args)
 	grainEnv = (double *) getPFieldTable(21, &grainEnvLen);
 
 	return nSamps();
-
 }
 
 
@@ -89,9 +90,9 @@ int SGRAN2::configure()
 	grains = new std::vector<Grain*>();
 	// maybe make the maximum grain value a non-pfield enabled parameter
 
-	for (int i = 0; i < 1500; i++)
+	for (int i = 0; i < MAXGRAINS; i++)
 	{
-		addgrain();
+		grains->push_back(new Grain());
 	}
 
 	_configured = true;
@@ -116,26 +117,6 @@ double SGRAN2::prob(double low,double mid,double high,double tight)
 	  	num = mid + sign*(pow((rrand()+1.)*.5,tight)*range);
 	} while(num < low || num > high);
 	return(num);
-}
-
-
-void SGRAN2::addgrain()
-{
-	// typedef struct {float waveSampInc; float ampSampInc; float wavePhase; float ampPhase; float dur; float panR; float panL float currTime; bool isplaying;} Grain;
-
-
-	Grain* newgrain = new Grain();
-	newgrain-> waveSampInc = 0;
-	newgrain-> ampSampInc = 0;
-	newgrain-> wavePhase = 0;
-	newgrain-> ampPhase = 0;
-	newgrain-> dur = 0;
-	newgrain-> panR = 0;
-	newgrain-> panL = 0;
-	newgrain-> currTime = 0;
-	newgrain-> isplaying = false;
-
-	grains->push_back(newgrain);
 }
 
 // set new parameters and turn on an idle grain
