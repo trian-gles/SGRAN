@@ -268,15 +268,13 @@ void STGRAN2::resetgrain(Grain* grain)
 	float grainDurSamps = (float) prob(grainDurLow, grainDurMid, grainDurHigh, grainDurTight) * SR;
 	int sampOffset = (int) round(abs(grainDurSamps * offset)); // how many total samples the grain will deviate from the normal buffer movement
 
-	
-
 	if (sampOffset >= buffer->GetMaxSize()) // this grain cannot exist with size of the buffer
 	{
 		rtcmix_advise("STGRAN2", "GRAIN IGNORED, SEE DOCS FOR 'BUFFER LIMITATIONS'");
 		return;
 	}
 
-	else if ((sampOffset >= buffer->GetSize()) && (rate < 0))
+	else if ((sampOffset >= buffer->GetSize()) && (offset > 0))
 	{
 		if (bufferBehaviour == 0)
 		{
@@ -286,7 +284,8 @@ void STGRAN2::resetgrain(Grain* grain)
 		}
 		else
 		{
-			grain->currTime = buffer->GetHead() + sampOffset;
+			//rtcmix_advise("STGRAN2", "FORCED TO MOVE GRAIN'");
+			grain->currTime = buffer->GetHead() - sampOffset;
 		}
 	}
 	else
@@ -294,7 +293,7 @@ void STGRAN2::resetgrain(Grain* grain)
 		int minShift;
 		int maxShift;
 
-		if (rate < 0)
+		if (offset< 0)
 		{
 			minShift = sampOffset;
 			maxShift = buffer->GetSize();
