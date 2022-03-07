@@ -1,7 +1,16 @@
 #include <Ougens.h>
 #include <vector>
 		  // the base class for this instrument
-typedef struct {float waveSampInc; float ampSampInc; float currTime; float ampPhase; float endTime; float panR; float panL; bool isplaying;} Grain;
+typedef struct {
+	float waveSampInc = 0; 
+	float ampSampInc = 0; 
+	float currTime = 0; 
+	float ampPhase = 0; 
+	float endTime = 0; 
+	float panR = 0; 
+	float panL = 0; 
+	bool isplaying = false;} 
+Grain;
 
 class AUDIOBUFFER {
 public:
@@ -10,6 +19,8 @@ public:
     double Get(float index);
     int GetHead();
     int GetSize();
+	void SetSize(int size);
+	int GetMaxSize();
     bool GetFull();
     void Append(double samp);
     void Print();
@@ -17,6 +28,7 @@ public:
 private:
     bool _full;
     int _head;
+	int _size;
     std::vector<double>* _buffer;
 };
 
@@ -35,11 +47,13 @@ public:
 	int calcgrainsrequired();
 
 private:
+	int _nargs;
 	int branch;
 
 	bool configured;
 	AUDIOBUFFER* buffer;
 	float* in;
+	int bufferBehaviour;
 
 	double transLow;
 	double transMid;

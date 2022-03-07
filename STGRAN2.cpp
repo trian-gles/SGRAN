@@ -1,3 +1,4 @@
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <ugens.h>
@@ -11,15 +12,19 @@
 #include <iostream>
 #include <vector>
 
+#define MAXBUFFER 44100
+#define MAXGRAINS 1500
+
 // Construct an instance of this instrument and initialize some variables.
 // Using an underbar as the first character of a data member is a nice
 // convention to follow, but it's not necessary, of course.  It helps you
 // to see at a glance whether you're looking at a local variable or a
 // data member.
 
-AUDIOBUFFER::AUDIOBUFFER(int maxSize): _full(false), _head(0)
+AUDIOBUFFER::AUDIOBUFFER(int size): _full(false), _head(0)
 {
-    _buffer = new std::vector<double>(maxSize);
+    _buffer = new std::vector<double>(MAXBUFFER);
+	_size = size;
 }
 
 AUDIOBUFFER::~AUDIOBUFFER()
@@ -51,7 +56,17 @@ int AUDIOBUFFER::GetHead()
 
 int AUDIOBUFFER::GetSize()
 {
-    return (int) _buffer->size();
+    return _size;
+}
+
+int AUDIOBUFFER::GetMaxSize()
+{
+	return _buffer->size();
+}
+
+void AUDIOBUFFER::SetSize(int size)
+{
+	_size = size;
 }
 
 bool AUDIOBUFFER::GetFull()
@@ -123,6 +138,8 @@ int STGRAN2::init(double p[], int n_args)
 		p18: panHigh
 		p19: panTight
 		p20: grainEnv
+		p21: bufferSize=1000
+		p22: bufferBehaviour=0
 	*/
 
 	if (rtsetinput(p[0], this) == -1)
@@ -135,15 +152,30 @@ int STGRAN2::init(double p[], int n_args)
 	      return die("STGRAN2", "Output must be mono or stereo.");
 
 	if (n_args < 21)
-		return die("STGRAN2", "all arguments are required");
+		return die("STGRAN2", "21 arguments are required");
+
+	else if (n_args > 23)
+		return die("STGRAN2", "too many args");
 
 	if (inputChannels() > 1)
 		rtcmix_advise("STGRAN2", "Only the first input channel will be used");
+
+	_nargs = n_args;
 
 	grainEnvLen = 0;
 	amp = p[2];
 
 	grainRate = p[3];
+
+	bufferBehaviour = 0;
+
+	if (n_args > 22)
+	{
+		bufferBehaviour = p[22];
+		if ((bufferBehaviour != 1) && (bufferBehaviour != 0))
+			return die("STGRAN2", "p22 (buffer behaviour) cannot be set to a value other than 0 or 1");
+	}
+
 	newGrainCounter = 0;
 	grainRateSamps = round(grainRate * SR);
 
@@ -169,12 +201,12 @@ int STGRAN2::configure()
 	// make the needed grains, which have no values yet as they need to be set dynamically
 	grains = new std::vector<Grain*>();
 	// maybe make the maximum grain value a non-pfield enabled parameter
-	for (int i = 0; i < 1500; i++)
+	for (int i = 0; i < MAXGRAINS; i++)
 	{
-		addgrain();
+		grains->push_back(new Grain());
 	}
 
-	buffer = new AUDIOBUFFER(44100); // figure out different buffer sizes
+	buffer = new AUDIOBUFFER(MAXBUFFER);
 
 	in = new float[RTBUFSAMPS*inputChannels()];
 
@@ -205,25 +237,6 @@ double STGRAN2::prob(double low,double mid,double high,double tight)
 	return(num);
 }
 
-
-void STGRAN2::addgrain()
-{
-	// typedef struct {float waveSampInc; float ampSampInc; float wavePhase; float ampPhase; float dur; float panR; float panL float currTime; bool isplaying;} Grain;
-
-
-	Grain* newgrain = new Grain();
-	newgrain-> waveSampInc = 0;
-	newgrain-> ampSampInc = 0;
-	newgrain-> ampPhase = 0;
-	newgrain-> endTime = 0;
-	newgrain-> panR = 0;
-	newgrain-> panL = 0;
-	newgrain-> currTime = 0;
-	newgrain-> isplaying = false;
-
-	grains->push_back(newgrain);
-}
-
 // set new parameters and turn on an idle grain
 void STGRAN2::resetgrain(Grain* grain)
 {
@@ -236,32 +249,52 @@ void STGRAN2::resetgrain(Grain* grain)
 	float offset = rate - 1;
 	float grainDurSamps = (float) prob(grainDurLow, grainDurMid, grainDurHigh, grainDurTight) * SR;
 	int sampOffset = (int) round(abs(grainDurSamps * offset)); // how many total samples the grain will deviate from the normal buffer movement
-	
-	
 
-
-	if (sampOffset > buffer->GetSize()) // this grain cannot exist with size of the buffer
+	if (sampOffset >= buffer->GetMaxSize()) // this grain cannot exist with size of the buffer
 	{
-		std::cout << "Grain offset too high!" <<"\n";
+		rtcmix_advise("STGRAN2", "GRAIN IGNORED, SEE DOCS FOR 'BUFFER LIMITATIONS'");
 		return;
 	}
 
-	int minShift;
-	int maxShift;
-
-	if (rate < 0)
+	else if ((sampOffset >= buffer->GetSize()) && (offset > 0))
 	{
-		maxShift = buffer->GetSize();
-		minShift = sampOffset;
+		if (bufferBehaviour == 0)
+		{
+			rtcmix_advise("STGRAN2", "GRAIN IGNORED, SEE DOCS FOR 'BUFFER LIMITATIONS'");
+			return;
+			
+		}
+		else
+		{
+			//rtcmix_advise("STGRAN2", "FORCED TO MOVE GRAIN'");
+			grain->currTime = buffer->GetHead() - sampOffset;
+		}
 	}
 	else
 	{
-		minShift = 1;
-		maxShift = buffer->GetSize() - sampOffset;
+		int minShift;
+		int maxShift;
+
+		if (offset< 0)
+		{
+			minShift = sampOffset;
+			maxShift = buffer->GetSize();
+		}
+		else
+		{
+			minShift = 1;
+			maxShift = buffer->GetSize() - sampOffset;
+		}
+
+		if (maxShift == minShift)
+		{
+			return; // There's a better way to handle this that I'll add at some point...
+		}
+
+		grain->currTime = buffer->GetHead() - (rand() % (maxShift - minShift) + minShift);
 	}
 
-
-	grain->currTime = buffer->GetHead() - (rand() % (maxShift - minShift) + minShift);
+	
 	
 	float panR = (float) prob(panLow, panMid, panHigh, panTight);
 	grain->waveSampInc = rate;
@@ -290,8 +323,8 @@ int STGRAN2::calcgrainsrequired()
 // update pfields
 void STGRAN2::doupdate()
 {
-	double p[20];
-	update(p, 20);
+	double p[22];
+	update(p, 22); // this could be fixed to only update necessary p-fields
 	amp =(float) p[2];
 
 	grainDurLow = (double)p[8];
@@ -315,6 +348,17 @@ void STGRAN2::doupdate()
 	panMid = (double)p[17]; if (panMid < panLow) panMid = panLow;
 	panHigh = (double)p[18]; if (panHigh < panMid) panHigh = panMid;
 	panTight = (double)p[19];
+
+	if (_nargs > 21)
+	{
+		int bufferSize = (int) floor(44100 * p[21] / 1000);
+		if (bufferSize > MAXBUFFER)
+		{
+			rtcmix_advise("STGRAN2", "Buffer size exceeds maximum, lowering to 1000");
+			bufferSize = MAXBUFFER;
+		}
+		buffer->SetSize(bufferSize);
+	}
 
 	// This needs to be redone at some point maybe
 	// grainsRequired = calcgrainsrequired();
