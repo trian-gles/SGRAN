@@ -12,7 +12,7 @@
 #include <iostream>
 #include <vector>
 
-#define MAXBUFFER 44100
+#define MAXBUFFER 441000
 #define MAXGRAINS 1500
 
 // Construct an instance of this instrument and initialize some variables.
@@ -25,6 +25,7 @@ AUDIOBUFFER::AUDIOBUFFER(int size): _full(false), _head(0)
 {
     _buffer = new std::vector<double>(MAXBUFFER);
 	_size = size;
+	// size refers to the PREFERRED size
 }
 
 AUDIOBUFFER::~AUDIOBUFFER()
@@ -35,8 +36,8 @@ AUDIOBUFFER::~AUDIOBUFFER()
 void AUDIOBUFFER::Append(double sample)
 {
     (*_buffer)[_head] = sample;
-    if (_head == (int) _buffer->size() -1)
-	_full = true;
+    if (_head == _buffer->size() -1)
+		_full = true;
     _head = (_head + 1) % _buffer->size();
 }
 
@@ -72,6 +73,11 @@ void AUDIOBUFFER::SetSize(int size)
 bool AUDIOBUFFER::GetFull()
 {
     return _full;
+}
+
+bool AUDIOBUFFER::CanRun()
+{
+	return (GetFull() || GetHead() > GetSize());
 }
 
 void AUDIOBUFFER::Print()
@@ -138,8 +144,7 @@ int STGRAN2::init(double p[], int n_args)
 		p18: panHigh
 		p19: panTight
 		p20: grainEnv
-		p21: bufferSize=1000
-		p22: bufferBehaviour=0
+		p21: bufferSize=1
 	*/
 
 	if (rtsetinput(p[0], this) == -1)
@@ -166,15 +171,6 @@ int STGRAN2::init(double p[], int n_args)
 	amp = p[2];
 
 	grainRate = p[3];
-
-	bufferBehaviour = 0;
-
-	if (n_args > 22)
-	{
-		bufferBehaviour = p[22];
-		if ((bufferBehaviour != 1) && (bufferBehaviour != 0))
-			return die("STGRAN2", "p22 (buffer behaviour) cannot be set to a value other than 0 or 1");
-	}
 
 	newGrainCounter = 0;
 	grainRateSamps = round(grainRate * SR);
@@ -241,7 +237,7 @@ double STGRAN2::prob(double low,double mid,double high,double tight)
 void STGRAN2::resetgrain(Grain* grain)
 {
 
-	if (!buffer->GetFull())
+	if (!buffer->CanRun())
 		return;
 
 	float trans = (float)prob(transLow, transMid, transHigh, transTight);
@@ -258,17 +254,8 @@ void STGRAN2::resetgrain(Grain* grain)
 
 	else if ((sampOffset >= buffer->GetSize()) && (offset > 0))
 	{
-		if (bufferBehaviour == 0)
-		{
-			rtcmix_advise("STGRAN2", "GRAIN IGNORED, SEE DOCS FOR 'BUFFER LIMITATIONS'");
-			return;
-			
-		}
-		else
-		{
-			//rtcmix_advise("STGRAN2", "FORCED TO MOVE GRAIN'");
-			grain->currTime = buffer->GetHead() - sampOffset;
-		}
+		// shift this grain
+		grain->currTime = buffer->GetHead() - sampOffset;
 	}
 	else
 	{
@@ -290,8 +277,9 @@ void STGRAN2::resetgrain(Grain* grain)
 		{
 			return; // There's a better way to handle this that I'll add at some point...
 		}
-
+		
 		grain->currTime = buffer->GetHead() - (rand() % (maxShift - minShift) + minShift);
+		
 	}
 
 	
@@ -351,7 +339,8 @@ void STGRAN2::doupdate()
 
 	if (_nargs > 21)
 	{
-		int bufferSize = (int) floor(44100 * p[21] / 1000);
+		int bufferSize = (int) floor(44100 * p[21]);
+		
 		if (bufferSize > MAXBUFFER)
 		{
 			rtcmix_advise("STGRAN2", "Buffer size exceeds maximum, lowering to 1000");

@@ -22,6 +22,7 @@ public:
 	void SetSize(int size);
 	int GetMaxSize();
     bool GetFull();
+	bool CanRun();
     void Append(double samp);
     void Print();
 
@@ -53,7 +54,6 @@ private:
 	bool configured;
 	AUDIOBUFFER* buffer;
 	float* in;
-	int bufferBehaviour;
 
 	double transLow;
 	double transMid;
