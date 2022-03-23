@@ -1,6 +1,6 @@
 rtsetparams(44100, 2)
 rtinput("clar.aiff")
-
+rtoupout("beauty.wav")
 
 load("./libSTGRAN2.so")
 
@@ -34,7 +34,7 @@ load("./libSTGRAN2.so")
 env = maketable("window", 1000, "hanning")
 amp = maketable("line", 1000, 0, 0, 1, 1, 20, 1, 21, 0)
 
-STGRAN2(0, 20, 0.125 * amp, 
+STGRAN2(0, 200, 0.125 * amp, 
 //grain rate
 .001, 0.1, 3, 10, 0.1, 
 //grain dur
@@ -43,7 +43,10 @@ STGRAN2(0, 20, 0.125 * amp,
 -2, 0, 2, 0.1, 
 //pan
 0, 0.5, 1, 0.4,
-//wavetables
-env)
+//wavetable
+env,
+//preffered buffer size
+2
+)
 
 

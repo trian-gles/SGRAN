@@ -25,6 +25,7 @@ AUDIOBUFFER::AUDIOBUFFER(int size): _full(false), _head(0)
 {
     _buffer = new std::vector<double>(MAXBUFFER);
 	_size = size;
+	// size refers to the PREFERRED size
 }
 
 AUDIOBUFFER::~AUDIOBUFFER()
@@ -35,7 +36,7 @@ AUDIOBUFFER::~AUDIOBUFFER()
 void AUDIOBUFFER::Append(double sample)
 {
     (*_buffer)[_head] = sample;
-    if (_head == (int) _buffer->size() -1)
+    if (_head == _size -1)
 	_full = true;
     _head = (_head + 1) % _buffer->size();
 }
@@ -138,6 +139,7 @@ int STGRAN2::init(double p[], int n_args)
 		p18: panHigh
 		p19: panTight
 		p20: grainEnv
+		p21: bufferSize=1
 	*/
 
 	if (rtsetinput(p[0], this) == -1)
@@ -152,7 +154,7 @@ int STGRAN2::init(double p[], int n_args)
 	if (n_args < 21)
 		return die("STGRAN2", "21 arguments are required");
 
-	else if (n_args > 22)
+	else if (n_args > 23)
 		return die("STGRAN2", "too many args");
 
 	if (inputChannels() > 1)
@@ -331,7 +333,7 @@ void STGRAN2::doupdate()
 
 	if (_nargs > 21)
 	{
-		int bufferSize = (int) floor(44100 * p[21] / 1000);
+		int bufferSize = (int) floor(44100 * p[21]);
 		if (bufferSize > MAXBUFFER)
 		{
 			rtcmix_advise("STGRAN2", "Buffer size exceeds maximum, lowering to 1000");

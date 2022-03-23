@@ -45,16 +45,20 @@ translo = maketable("line", "nonorm", 1000, 0, -2, 1, -14)
 transhi = maketable("line", "nonorm", 1000, 0, 2, 1, 14)
 transtight = maketable("line", "nonorm", 1000, 0, 2, 1, 0.1)
 
-STGRAN2(0, 80, 0.125 * amp, 
+buffer_size = makeLFO("tri", 0.5, 0.02, 1)
+
+// buffer_size = 1000
+
+STGRAN2(0, 20, 0.025 * amp, 
 //grain rate
-.0005, 0.1, 3, 10, 0.1, 
+.001, 0.4, .1, 4, 80, 
 //grain dur
-durlo, durmid, durhigh, 0.1, 
+durlo, durmid, durhigh, 0.6, 
 //trans
-translo, 0, transhi, 0.1, 
+translo, 0, transhi, transhi, 
 //pan
-0, 0.5, 1, 0.4,
+0, 0.5, 1, 0.6,
 //wavetables
-env, 1, 1)
+env, buffer_size)
 
 

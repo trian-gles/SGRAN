@@ -77,10 +77,7 @@ Args:
     - p18: panHigh*  
     - p19: panTight*  
     - p20: grainEnv**
-    - p21: (optional) size of the input buffer in ms, higher sizes will cause more smear of impulses or sudden changes.  Set to the maximum 1000ms by default*
-    - p22: (optional) change the behaviour of the buffer.  A value of 0 (default) means that the instrument will forbid grains that require more samples than the size set by p21.  A value of 1 allows grains to use the extended buffer if needed, which may result in a downward cascading effect.
+    - p21: (optional) preferred size of the input buffer used in seconds, higher sizes will cause more smear of impulses or sudden changes.  1 by default*
     
 \* may receive a reference to a pfield handle  
 \*\* must receive a reference to a pfield maketable handle
-
-BUFFER LIMITATIONS - extreme transpositions or high grain durations can result in a grain moving too fast and wanting to move "into the future" or move too slow and be overlapped by the circular buffer writing new input samples.  In this event, the instrument will ignore the request for this grain.  A higher value for p21 or a p22 value of 1 may alleviate this 
