@@ -12,7 +12,7 @@
 #include <iostream>
 #include <vector>
 
-#define MAXBUFFER 44100
+#define MAXBUFFER 441000
 #define MAXGRAINS 1500
 
 // Construct an instance of this instrument and initialize some variables.
@@ -138,8 +138,6 @@ int STGRAN2::init(double p[], int n_args)
 		p18: panHigh
 		p19: panTight
 		p20: grainEnv
-		p21: bufferSize=1000
-		p22: bufferBehaviour=0
 	*/
 
 	if (rtsetinput(p[0], this) == -1)
@@ -154,7 +152,7 @@ int STGRAN2::init(double p[], int n_args)
 	if (n_args < 21)
 		return die("STGRAN2", "21 arguments are required");
 
-	else if (n_args > 23)
+	else if (n_args > 22)
 		return die("STGRAN2", "too many args");
 
 	if (inputChannels() > 1)
@@ -166,15 +164,6 @@ int STGRAN2::init(double p[], int n_args)
 	amp = p[2];
 
 	grainRate = p[3];
-
-	bufferBehaviour = 0;
-
-	if (n_args > 22)
-	{
-		bufferBehaviour = p[22];
-		if ((bufferBehaviour != 1) && (bufferBehaviour != 0))
-			return die("STGRAN2", "p22 (buffer behaviour) cannot be set to a value other than 0 or 1");
-	}
 
 	newGrainCounter = 0;
 	grainRateSamps = round(grainRate * SR);
@@ -258,17 +247,8 @@ void STGRAN2::resetgrain(Grain* grain)
 
 	else if ((sampOffset >= buffer->GetSize()) && (offset > 0))
 	{
-		if (bufferBehaviour == 0)
-		{
-			rtcmix_advise("STGRAN2", "GRAIN IGNORED, SEE DOCS FOR 'BUFFER LIMITATIONS'");
-			return;
-			
-		}
-		else
-		{
-			//rtcmix_advise("STGRAN2", "FORCED TO MOVE GRAIN'");
-			grain->currTime = buffer->GetHead() - sampOffset;
-		}
+		// shift this grain
+		grain->currTime = buffer->GetHead() - sampOffset;
 	}
 	else
 	{

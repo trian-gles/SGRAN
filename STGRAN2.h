@@ -53,7 +53,6 @@ private:
 	bool configured;
 	AUDIOBUFFER* buffer;
 	float* in;
-	int bufferBehaviour;
 
 	double transLow;
 	double transMid;
