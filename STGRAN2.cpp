@@ -36,8 +36,8 @@ AUDIOBUFFER::~AUDIOBUFFER()
 void AUDIOBUFFER::Append(double sample)
 {
     (*_buffer)[_head] = sample;
-    if (_head == _size -1)
-	_full = true;
+    if (_head == _buffer->size() -1)
+		_full = true;
     _head = (_head + 1) % _buffer->size();
 }
 
@@ -73,6 +73,11 @@ void AUDIOBUFFER::SetSize(int size)
 bool AUDIOBUFFER::GetFull()
 {
     return _full;
+}
+
+bool AUDIOBUFFER::CanRun()
+{
+	return (GetFull() || GetHead() > GetSize());
 }
 
 void AUDIOBUFFER::Print()
@@ -232,7 +237,7 @@ double STGRAN2::prob(double low,double mid,double high,double tight)
 void STGRAN2::resetgrain(Grain* grain)
 {
 
-	if (!buffer->GetFull())
+	if (!buffer->CanRun())
 		return;
 
 	float trans = (float)prob(transLow, transMid, transHigh, transTight);
@@ -272,8 +277,9 @@ void STGRAN2::resetgrain(Grain* grain)
 		{
 			return; // There's a better way to handle this that I'll add at some point...
 		}
-
+		
 		grain->currTime = buffer->GetHead() - (rand() % (maxShift - minShift) + minShift);
+		
 	}
 
 	
@@ -334,6 +340,7 @@ void STGRAN2::doupdate()
 	if (_nargs > 21)
 	{
 		int bufferSize = (int) floor(44100 * p[21]);
+		
 		if (bufferSize > MAXBUFFER)
 		{
 			rtcmix_advise("STGRAN2", "Buffer size exceeds maximum, lowering to 1000");
