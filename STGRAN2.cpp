@@ -248,7 +248,7 @@ void STGRAN2::resetgrain(Grain* grain)
 
 	if (sampOffset >= buffer->GetMaxSize()) // this grain cannot exist with size of the buffer
 	{
-		rtcmix_advise("STGRAN2", "GRAIN IGNORED, SEE DOCS FOR 'BUFFER LIMITATIONS'");
+		rtcmix_advise("STGRAN2", "GRAIN IGNORED, TRANSPOSITION OR DURATION TOO EXTREME");
 		return;
 	}
 
@@ -343,7 +343,7 @@ void STGRAN2::doupdate()
 		
 		if (bufferSize > MAXBUFFER)
 		{
-			rtcmix_advise("STGRAN2", "Buffer size exceeds maximum, lowering to 1000");
+			rtcmix_advise("STGRAN2", "Buffer size capped at 10 seconds");
 			bufferSize = MAXBUFFER;
 		}
 		buffer->SetSize(bufferSize);
