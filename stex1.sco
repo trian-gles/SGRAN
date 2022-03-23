@@ -1,6 +1,5 @@
 rtsetparams(44100, 2)
 rtinput("clar.aiff")
-rtoupout("beauty.wav")
 
 load("./libSTGRAN2.so")
 
