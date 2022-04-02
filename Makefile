@@ -6,7 +6,7 @@ NAME2 = STGRAN2
 OBJS = $(NAME).o
 OBJS2 = $(NAME2).o
 CMIXOBJS += $(PROFILE_O)
-CXXFLAGS += -I. -Wall 
+CXXFLAGS += -I. -Wall -std=c++11
 PROGS = $(NAME) lib$(NAME).so $(NAME2) lib$(NAME2).so
 
 all: lib$(NAME).so lib$(NAME2).so

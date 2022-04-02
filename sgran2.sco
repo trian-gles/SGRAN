@@ -24,6 +24,7 @@ load("./libSGRAN2.so")
 		p19: panTight*
                 p20: wavetable*
                 p21: grainEnv* 
+                p22: cores
 		
 		* p20(wavetable) and p21(grainEnv) must be passed as pfield make tables.  
 		p2(amp) may receive a table or some other pfield source
@@ -57,7 +58,9 @@ panti = 0.4
 wave = maketable("wave", 1000, "square")
 env = src_env = maketable("window", 1000, "hanning")
 
+cores = 1
+
 SGRAN2(inskip, dur, 800 * amp, rate, ratelo, ratemid, ratehi, rateti, durlo, durmid, durhi, durti, 
-freqlo, freqmid, freqhi, freqti, panlo, panmid, panhi, panti, wave, env)
+freqlo, freqmid, freqhi, freqti, panlo, panmid, panhi, panti, wave, env, cores)
 
 

@@ -1,5 +1,6 @@
 #include <Ougens.h>
 #include <vector>
+#include <utility>
 		  // the base class for this instrument
 typedef struct {
 	float waveSampInc = 0; 
@@ -29,6 +30,9 @@ public:
 	int calcgrainsrequired();
 
 private:
+	void handlegrains(int index, float (&out)[2], bool makegrain, int &finishedCount);
+	int findminindex();
+
 	bool _configured;
 	int _branch;
 
@@ -49,7 +53,9 @@ private:
 
 	float amp;
 
+	std::vector<int> grainCounts;
 	std::vector<Grain*>* grains;
+	int threadCount;
 	int newGrainCounter;
 
 	int grainRateSamps;

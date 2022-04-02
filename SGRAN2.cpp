@@ -10,8 +10,16 @@
 #include <rtdefs.h>
 #include <iostream>
 #include <vector>
+#include <thread>
+#include <utility>
 
 #define MAXGRAINS 1500
+
+
+void threadFunc()
+{
+	std::cout << "Thread function called\n";
+}
 
 SGRAN2::SGRAN2() : _branch(0)
 {
@@ -57,6 +65,7 @@ int SGRAN2::init(double p[], int n_args)
 		p19: panTight
 		p20: wavetable
 		p21: grainEnv
+		p22: threads
 	*/
 
 	if (rtsetoutput(p[0], p[1], this) == -1)
@@ -79,6 +88,8 @@ int SGRAN2::init(double p[], int n_args)
 	wavetable = (double *) getPFieldTable(20, &wavetableLen);
 	grainEnv = (double *) getPFieldTable(21, &grainEnvLen);
 
+	threadCount = p[22];
+	
 	return nSamps();
 }
 
@@ -90,12 +101,18 @@ int SGRAN2::configure()
 	grains = new std::vector<Grain*>();
 	// maybe make the maximum grain value a non-pfield enabled parameter
 
-	for (int i = 0; i < MAXGRAINS; i++)
+	for (int i = 0; i < MAXGRAINS * threadCount; i++)
 	{
 		grains->push_back(new Grain());
 	}
 
+	for (int i = 0; i < threadCount; i++)
+	{
+		grainCounts.push_back(0);
+	}
+
 	_configured = true;
+	
 
 	return 0;	// IMPORTANT: Return 0 on success, and -1 on failure.
 }
@@ -149,6 +166,45 @@ int SGRAN2::calcgrainsrequired()
 	return ceil(grainDurMid / (grainRateVarMid * grainRate)) + 1;
 }
 
+void SGRAN2::handlegrains(int index, float (&out)[2], bool makegrain, int &finishedCount)
+{
+	grainCounts[index] = 0;
+	for (int j = 0; j < MAXGRAINS; j++)
+	{
+		Grain* currGrain = (*grains)[j + MAXGRAINS * index];
+		if (currGrain->isplaying)
+		{
+			if (++(*currGrain).currTime > currGrain->dur)
+			{
+				currGrain->isplaying = false;
+			}
+			else
+			{
+				// should include an interpolation option at some point
+				float grainAmp = oscil(1, currGrain->ampSampInc, grainEnv, grainEnvLen, &((*currGrain).ampPhase));
+				float grainOut = oscil(grainAmp,currGrain->waveSampInc, wavetable, wavetableLen, &((*currGrain).wavePhase));
+				out[0] += grainOut * currGrain->panL;
+				out[1] += grainOut * currGrain->panR;
+				grainCounts[index]++;
+			}
+		}
+		// this is not an else statement so a grain can be potentially stopped and restarted on the same frame
+
+		if ((makegrain) && !currGrain->isplaying)
+		{
+			resetgraincounter();
+			if (newGrainCounter > 0) // we don't grain rates to be faster than the sampling rate
+				{resetgrain(currGrain);}
+			else
+				{newGrainCounter = 1;}
+			
+			grainCounts[index]++;
+
+		}
+	}
+	finishedCount++;
+	std::cout << finishedCount <<"\n";
+}
 
 // update pfields
 void SGRAN2::doupdate()
@@ -185,56 +241,73 @@ void SGRAN2::doupdate()
 
 }
 
+int SGRAN2::findminindex()
+{
+	int min = MAXGRAINS + 1;
+	int index;
+
+	for (int i = 0; i < threadCount; i++)
+	{
+		if (grainCounts[i] < min)
+		{
+			min = grainCounts[i];
+			index = i;
+		}
+	}
+	return index;
+
+}
+
 
 int SGRAN2::run()
 {
-	float out[2];
+	
 	for (int i = 0; i < framesToRun(); i++) {
+		
 		if (--_branch <= 0)
 		{
-		doupdate();
-		_branch = getSkip();
+			doupdate();
+			_branch = getSkip();
 		}
 
+		float out[2];
 		out[0] = 0;
 		out[1] = 0;
-		for (size_t j = 0; j < grains->size(); j++)
+
+		int newGrainIndex = -1; // the index of the thread that should make a new grain
+		if (newGrainCounter == 0)
 		{
-			Grain* currGrain = (*grains)[j];
-			if (currGrain->isplaying)
-			{
-				if (++(*currGrain).currTime > currGrain->dur)
-				{
-					currGrain->isplaying = false;
-				}
-				else
-				{
-					// should include an interpolation option at some point
-					float grainAmp = oscil(1, currGrain->ampSampInc, grainEnv, grainEnvLen, &((*currGrain).ampPhase));
-					float grainOut = oscil(grainAmp,currGrain->waveSampInc, wavetable, wavetableLen, &((*currGrain).wavePhase));
-					out[0] += grainOut * currGrain->panL;
-					out[1] += grainOut * currGrain->panR;
-				}
-			}
-			// this is not an else statement so a grain can be potentially stopped and restarted on the same frame
-
-			if ((newGrainCounter == 0) && !currGrain->isplaying)
-			{
-				resetgraincounter();
-				if (newGrainCounter > 0) // we don't allow two grains to be create o
-					{resetgrain(currGrain);}
-				else
-					{newGrainCounter = 1;}
-
-			}
+			newGrainIndex = findminindex();
 		}
 
+		std::vector<std::thread> threads;
+		int finishedCount = 0;
+		for (int j = 0; j < threadCount; j++)
+		{
+			threads.push_back(std::thread(&SGRAN2::handlegrains, this, j, std::ref(out), (j == newGrainIndex ), std::ref(finishedCount)));
+			//threads.push_back(std::thread(&SGRAN2::run, this));
+		}
+
+		
+
+		for (int j = 0; j < threadCount; j++)
+		{
+			threads.push_back(std::thread(&SGRAN2::handlegrains, this, j, std::ref(out), (j == newGrainIndex ), std::ref(finishedCount)));
+			threads[j].detach();
+			//threads.push_back(std::thread(&SGRAN2::run, this));
+		}
+
+		while (finishedCount < threadCount)
+		{
+			std::cout << finishedCount << "\n";
+		}
+		std::cout << "threads finished \n";
 		// if all current grains are occupied, we skip this request for a new grain
 		if (newGrainCounter == 0)
 		{
 			resetgraincounter();
 		}
-
+		
 		out[0] *= amp;
 		out[1] *= amp;
 		rtaddout(out);
