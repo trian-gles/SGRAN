@@ -30,7 +30,7 @@ public:
 	int calcgrainsrequired();
 
 private:
-	void handlegrains(int index, float (&out)[2], bool makegrain, int &finishedCount);
+	void handlegrains(int index, std::pair<float, float> &out, bool makegrain);
 	int findminindex();
 
 	bool _configured;

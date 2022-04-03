@@ -12,9 +12,10 @@
 #include <vector>
 #include <thread>
 #include <utility>
+#include <chrono>
 
 #define MAXGRAINS 1500
-
+using namespace std::chrono;
 
 void threadFunc()
 {
@@ -166,8 +167,9 @@ int SGRAN2::calcgrainsrequired()
 	return ceil(grainDurMid / (grainRateVarMid * grainRate)) + 1;
 }
 
-void SGRAN2::handlegrains(int index, float (&out)[2], bool makegrain, int &finishedCount)
+void SGRAN2::handlegrains(int index, std::pair<float, float> &out, bool makegrain)
 {
+	auto start = high_resolution_clock::now();
 	grainCounts[index] = 0;
 	for (int j = 0; j < MAXGRAINS; j++)
 	{
@@ -183,8 +185,8 @@ void SGRAN2::handlegrains(int index, float (&out)[2], bool makegrain, int &finis
 				// should include an interpolation option at some point
 				float grainAmp = oscil(1, currGrain->ampSampInc, grainEnv, grainEnvLen, &((*currGrain).ampPhase));
 				float grainOut = oscil(grainAmp,currGrain->waveSampInc, wavetable, wavetableLen, &((*currGrain).wavePhase));
-				out[0] += grainOut * currGrain->panL;
-				out[1] += grainOut * currGrain->panR;
+				out.first += grainOut * currGrain->panL;
+				out.second += grainOut * currGrain->panR;
 				grainCounts[index]++;
 			}
 		}
@@ -202,8 +204,10 @@ void SGRAN2::handlegrains(int index, float (&out)[2], bool makegrain, int &finis
 
 		}
 	}
-	finishedCount++;
-	std::cout << finishedCount <<"\n";
+
+	auto stop = high_resolution_clock::now();
+	auto duration = duration_cast<microseconds>(stop - start);
+	std::cout << "Time taken by function: " << duration.count() << " microseconds\n";
 }
 
 // update pfields
@@ -270,9 +274,8 @@ int SGRAN2::run()
 			_branch = getSkip();
 		}
 
-		float out[2];
-		out[0] = 0;
-		out[1] = 0;
+		
+		std::vector<std::pair<float, float> > outs(threadCount, std::make_pair(0, 0));
 
 		int newGrainIndex = -1; // the index of the thread that should make a new grain
 		if (newGrainCounter == 0)
@@ -281,40 +284,48 @@ int SGRAN2::run()
 		}
 
 		std::vector<std::thread> threads;
-		int finishedCount = 0;
-		for (int j = 0; j < threadCount; j++)
-		{
-			threads.push_back(std::thread(&SGRAN2::handlegrains, this, j, std::ref(out), (j == newGrainIndex ), std::ref(finishedCount)));
-			//threads.push_back(std::thread(&SGRAN2::run, this));
-		}
-
 		
 
 		for (int j = 0; j < threadCount; j++)
 		{
-			threads.push_back(std::thread(&SGRAN2::handlegrains, this, j, std::ref(out), (j == newGrainIndex ), std::ref(finishedCount)));
-			threads[j].detach();
-			//threads.push_back(std::thread(&SGRAN2::run, this));
+			threads.push_back(std::thread(&SGRAN2::handlegrains, this, j, std::ref(outs[j]), (j == newGrainIndex )));
 		}
+		
+		
+		
 
-		while (finishedCount < threadCount)
+		for (int j = 0; j < threadCount; j++)
 		{
-			std::cout << finishedCount << "\n";
+			threads[j].join();
 		}
-		std::cout << "threads finished \n";
+		
+		//handlegrains(0, outs[0], 0 == newGrainIndex);
+
+		
+		
+
 		// if all current grains are occupied, we skip this request for a new grain
 		if (newGrainCounter == 0)
 		{
 			resetgraincounter();
 		}
 		
+		float out[2] = {0, 0};
+
+		for (int j = 0; j < threadCount; j++)
+		{
+			out[0] += outs[j].first;
+			out[1] += outs[j].second;
+		}
+
+
 		out[0] *= amp;
 		out[1] *= amp;
 		rtaddout(out);
 		newGrainCounter--;
 		increment();
 	}
-
+	
 	// Return the number of frames we processed.
 
 	return framesToRun();

@@ -60,7 +60,7 @@ env = src_env = maketable("window", 1000, "hanning")
 
 cores = 1
 
-SGRAN2(inskip, dur, 800 * amp, rate, ratelo, ratemid, ratehi, rateti, durlo, durmid, durhi, durti, 
+SGRAN2(inskip, dur, 300 * amp, rate, ratelo, ratemid, ratehi, rateti, durlo, durmid, durhi, durti, 
 freqlo, freqmid, freqhi, freqti, panlo, panmid, panhi, panti, wave, env, cores)
 
 
