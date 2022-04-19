@@ -358,7 +358,7 @@ void STGRAN2::doupdate()
 // Called by the scheduler for every time slice in which this instrument
 // should run.  This is where the real work of the instrument is done.
 int STGRAN2::run()
-{
+{	
 	//std::cout<<"new control block"<<"\n";
 	float out[2];
 	int samps = framesToRun() * inputChannels();
@@ -398,22 +398,24 @@ int STGRAN2::run()
 			}
 			// this is not an else statement so a grain can be potentially stopped and restarted on the same frame
 
-			if ((newGrainCounter == 0) && !currGrain->isplaying)
+			if ((newGrainCounter <= 0) && !currGrain->isplaying)
 			{
 				resetgraincounter();
 				if (newGrainCounter > 0) // we don't allow two grains to be created on the same frame
-					{resetgrain(currGrain);}
+					{resetgrain(currGrain);
+					
+					}
 				else
-					{newGrainCounter = 1;}
+					{newGrainCounter = 1;
+					}
 
 			}
 		}
 
 		// if all current grains are occupied, we skip this request for a new grain
-		if (newGrainCounter == 0)
+		if (newGrainCounter <= 0)
 		{
 			resetgraincounter();
-			//std::cout << "skipping grain request" << "\n";
 		}
 
 		out[0] *= amp;
