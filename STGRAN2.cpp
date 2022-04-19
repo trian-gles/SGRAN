@@ -145,6 +145,7 @@ int STGRAN2::init(double p[], int n_args)
 		p19: panTight
 		p20: grainEnv
 		p21: bufferSize=1
+		p22: grainLimit=1500
 	*/
 
 	if (rtsetinput(p[0], this) == -1)
@@ -159,7 +160,9 @@ int STGRAN2::init(double p[], int n_args)
 	if (n_args < 21)
 		return die("STGRAN2", "21 arguments are required");
 
-	else if (n_args > 23)
+	if (n_args > 21)
+
+	else if (n_args > 24)
 		return die("STGRAN2", "too many args");
 
 	if (inputChannels() > 1)
@@ -171,6 +174,12 @@ int STGRAN2::init(double p[], int n_args)
 	amp = p[2];
 
 	grainRate = p[3];
+
+	if (n_args > 21)
+	{
+
+	}
+
 
 	newGrainCounter = 0;
 	grainRateSamps = round(grainRate * SR);
