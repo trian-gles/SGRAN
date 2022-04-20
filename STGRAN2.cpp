@@ -41,7 +41,11 @@ double AUDIOBUFFER::Get(float index) // maybe add interpolation at some point
 		index += (float) _buffer->size();
 	while (index > _buffer->size())
 		index -= (float) _buffer->size();
-    return (*_buffer)[(int) index];
+	int i = (int) index;
+	int k = i + 1;
+	float frac = index - i;
+
+    return (*_buffer)[i] + ((*_buffer)[k] - (*_buffer)[i]) * frac;
 }
 
 int AUDIOBUFFER::GetHead()
