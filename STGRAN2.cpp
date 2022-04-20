@@ -35,7 +35,7 @@ void AUDIOBUFFER::Append(double sample)
     _head = (_head + 1) % _buffer->size();
 }
 
-double AUDIOBUFFER::Get(float index) // maybe add interpolation at some point
+double AUDIOBUFFER::Get(float index)
 {
 	while (index < 0)
 		index += (float) _buffer->size();
