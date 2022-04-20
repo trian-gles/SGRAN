@@ -21,7 +21,19 @@ https://user-images.githubusercontent.com/69212477/148408034-002d62c7-b3ef-4b4c-
 
 Make sure the package.conf points to the appropriate RTcmix makefile.conf before building, then `make`
 
-See the included scorefiles for example usage
+Both instruments rely on Dr. Helmuth's `prob` function, which takes four floating point parameters: `low`, `mid`, `high` and `tight`.  Calling this function returns a stochastically chosen value based on a distribution centered around `mid` with upper and lower bounds at `low` and `high`.  The `tight` value determines how closely the distribution clusters at `mid`.  `tight` of 1 will be an even distribution, with more than one being closer to the `mid` value, and less than one spreading towards the `low` and `high` bounds.
+
+Every time a new grain is spawn, multiple `prob` functions run to generate properties of that grain.  These include the time until the next grain, the duration of this grain, the frequency of this grain, and the panning of this grain.
+
+SGRAN2 creates grains from a user provided periodic wavefornm.
+
+STGRAN2 works with a provided audio file or realtime audio source.
+
+Both apply a user provided windowing function for each grain.
+
+
+
+See the included scorefiles
 
 ### SGRAN2
 
@@ -37,7 +49,7 @@ Args:
     - p8: grainDurMid*  
     - p9: grainDurHigh*  
     - p10: grainDurTight*  
-    - p11: freqLow (Hz)*  
+    - p11: freqLow (Hz or oct.pc)*  
     - p12: freqMid*  
     - p13: freqHigh*  
     - p14: freqTight*  

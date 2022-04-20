@@ -185,6 +185,14 @@ void SGRAN2::doupdate()
 	freqHigh = (double)p[13]; if (freqHigh < freqMid) freqHigh = freqMid;
 	freqTight = (double)p[14];
 
+	if (freqLow < 15.0)
+		freqLow = cpspch(freqLow)
+
+	if (freqMid < 15.0)
+		freqLow = cpspch(freqLow)
+
+	if (freqHigh < 15.0)
+		freqLow = cpspch(freqLow)
 
 	panLow = (double)p[15];
 	panMid = (double)p[16]; if (panMid < panLow) panMid = panLow;
