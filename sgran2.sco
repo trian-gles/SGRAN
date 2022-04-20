@@ -5,25 +5,24 @@ load("./libSGRAN2.so")
                 p0: inskip
                 p1: dur
                 p2: amp*
-                p3: grainRate (seconds before new grain)
-                p4: grainRateVarLow (fraction of grainRate actually used)*
-                p5: grainRateVarMid*
-                p6: grainRateVarHigh*
-                p7: grainRateVarTight*
-                p8: grainDurLow (length of grain in seconds)*
-                p9: grainDurMid*
-                p10: grainDurHigh*
-                p11: grainDurTight*
-                p12: freqLow (semitones)*
-                p13: freqMid (semitones)*
-                p14: freqHigh (semitones)*
-                p15: freqTight*
-		p16: panLow (0 - 1.0)*
-		p17: panMid*
-		p18: panHigh*
-		p19: panTight*
-                p20: wavetable*
-                p21: grainEnv* 
+                p3: grainRateVarLow (fraction of grainRate actually used)*
+                p4: grainRateVarMid*
+                p5: grainRateVarHigh*
+                p6: grainRateVarTight*
+                p7: grainDurLow (length of grain in seconds)*
+                p8: grainDurMid*
+                p9: grainDurHigh*
+                p10: grainDurTight*
+                p11: freqLow (semitones)*
+                p12: freqMid (semitones)*
+                p13: freqHigh (semitones)*
+                p14: freqTight*
+		p15: panLow (0 - 1.0)*
+		p16: panMid*
+		p17: panHigh*
+		p18: panTight*
+                p19: wavetable*
+                p20: grainEnv* 
 		
 		* p20(wavetable) and p21(grainEnv) must be passed as pfield make tables.  
 		p2(amp) may receive a table or some other pfield source
@@ -33,7 +32,6 @@ dur = 25
 
 amp = maketable("line", 1000, 0, 0, 8, 0.8, 16, 1, 17, 0)
 
-rate = 1
 ratelo = 0.00004
 ratemid = maketable("line", "nonorm", 200, 0, 0.0008, 1, 0.00008)
 ratehi = maketable("line", "nonorm", 200, 0, 0.004, 1, 0.0004)
@@ -57,7 +55,7 @@ panti = 0.4
 wave = maketable("wave", 1000, "square")
 env = src_env = maketable("window", 1000, "hanning")
 
-SGRAN2(inskip, dur, 800 * amp, rate, ratelo, ratemid, ratehi, rateti, durlo, durmid, durhi, durti, 
+SGRAN2(inskip, dur, 800 * amp, ratelo, ratemid, ratehi, rateti, durlo, durmid, durhi, durti, 
 freqlo, freqmid, freqhi, freqti, panlo, panmid, panhi, panti, wave, env)
 
 

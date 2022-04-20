@@ -53,7 +53,6 @@ private:
 	int grainLimit;
 	int newGrainCounter;
 
-	int grainRateSamps;
 	double grainRateVarLow;
 	double grainRateVarMid;
 	double grainRateVarHigh;

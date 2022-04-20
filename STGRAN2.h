@@ -76,7 +76,6 @@ private:
 	int grainLimit;
 	int newGrainCounter;
 
-	int grainRateSamps;
 	double grainRateVarLow;
 	double grainRateVarMid;
 	double grainRateVarHigh;
@@ -84,7 +83,6 @@ private:
 
 	double* grainEnv;
 	int grainEnvLen;
-	float grainRate;
 	void doupdate();
 };
 

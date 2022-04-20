@@ -38,26 +38,25 @@ int SGRAN2::init(double p[], int n_args)
 		p0: inskip
 		p1: dur
 		p2: amp
-		p3: grainRate
-		p4: grainRateVarLow
-		p5: grainRateVarMid
-		p6: grainRateVarHigh
-		p7: grainRateVarTigh
-		p8: grainDurLow
-		p9: grainDurMid
-		p10: grainDurHigh
-		p11: grainDurTight
-		p12: freqLow
-		p13: freqMid
-		p14: freqHigh
-		p15: freqTight
-		p16: panLow
-		p17: panMid
-		p18: panHigh
-		p19: panTight
-		p20: wavetable
-		p21: grainEnv
-		p22: grainLimit=1500
+		p3: grainRateVarLow
+		p4: grainRateVarMid
+		p5: grainRateVarHigh
+		p6: grainRateVarTigh
+		p7: grainDurLow
+		p8: grainDurMid
+		p9: grainDurHigh
+		p10: grainDurTight
+		p11: freqLow
+		p12: freqMid
+		p13: freqHigh
+		p14: freqTight
+		p15: panLow
+		p16: panMid
+		p17: panHigh
+		p18: panTight
+		p19: wavetable
+		p20: grainEnv
+		p21: grainLimit=1500
 	*/
 	if (rtsetoutput(p[0], p[1], this) == -1)
 		return DONT_SCHEDULE;
@@ -65,25 +64,23 @@ int SGRAN2::init(double p[], int n_args)
 	if (outputChannels() > 2)
 	      return die("SGRAN2", "Output must be mono or stereo.");
 
-	if (n_args < 22)
-		return die("SGRAN2", "22 arguments are required");
-	else if (n_args > 23)
+	if (n_args < 21)
+		return die("SGRAN2", "21 arguments are required");
+	else if (n_args > 22)
 		return die("SGRAN2", "too many arguments");
 	grainEnvLen = 0;
 	wavetableLen = 0;
 	amp = p[2];
 
-	grainRate = p[3];
 	newGrainCounter = 0;
-	grainRateSamps = round(grainRate * SR);
 
 	// init tables
-	wavetable = (double *) getPFieldTable(20, &wavetableLen);
-	grainEnv = (double *) getPFieldTable(21, &grainEnvLen);
+	wavetable = (double *) getPFieldTable(19, &wavetableLen);
+	grainEnv = (double *) getPFieldTable(20, &grainEnvLen);
 
-	if (n_args > 22)
+	if (n_args > 21)
 	{
-		grainLimit = p[22];
+		grainLimit = p[21];
 		if (grainLimit > MAXGRAINS)
 		{
 			rtcmix_advise("STGRAN2", "user provided max grains exceeds limit, lowering to 1500");
@@ -101,14 +98,12 @@ int SGRAN2::init(double p[], int n_args)
 
 int SGRAN2::configure()
 {
-	std::cout << "running config with grainLimit " << grainLimit << "\n";
 	// make the needed grains, which have no values yet as they need to be set dynamically
 	grains = new std::vector<Grain*>();
 	// maybe make the maximum grain value a non-pfield enabled parameter
 
 	for (int i = 0; i < grainLimit; i++)
 	{
-		std::cout << "pushing grain \n";
 		grains->push_back(new Grain());
 	}
 
@@ -157,7 +152,7 @@ void SGRAN2::resetgrain(Grain* grain)
 
 void SGRAN2::resetgraincounter()
 {
-	newGrainCounter = (int)round(grainRateSamps * prob(grainRateVarLow, grainRateVarMid, grainRateVarHigh, grainRateVarTight));
+	newGrainCounter = (int)round(SR * prob(grainRateVarLow, grainRateVarMid, grainRateVarHigh, grainRateVarTight));
 }
 
 // determine the maximum grains we need total.  Needs to be redone using ZE CALCULUS
@@ -170,31 +165,31 @@ int SGRAN2::calcgrainsrequired()
 // update pfields
 void SGRAN2::doupdate()
 {
-	double p[20];
-	update(p, 20);
+	double p[19];
+	update(p, 19);
 	amp =(float) p[2];
 
-	grainDurLow = (double)p[8];
-	grainDurMid = (double)p[9]; if (grainDurMid < grainDurLow) grainDurMid = grainDurLow;
-	grainDurHigh = (double)p[10]; if (grainDurHigh < grainDurMid) grainDurHigh = grainDurMid;
-	grainDurTight = (double)p[11];
+	grainDurLow = (double)p[7];
+	grainDurMid = (double)p[8]; if (grainDurMid < grainDurLow) grainDurMid = grainDurLow;
+	grainDurHigh = (double)p[9]; if (grainDurHigh < grainDurMid) grainDurHigh = grainDurMid;
+	grainDurTight = (double)p[10];
 
 
-	grainRateVarLow = (double)p[4];
-	grainRateVarMid = (double)p[5]; if (grainRateVarMid < grainRateVarLow) grainRateVarMid = grainRateVarLow;
-	grainRateVarHigh = (double)p[6]; if (grainRateVarHigh < grainRateVarMid) grainRateVarHigh = grainRateVarMid;
-	grainRateVarTight = (double)p[7];
+	grainRateVarLow = (double)p[3];
+	grainRateVarMid = (double)p[4]; if (grainRateVarMid < grainRateVarLow) grainRateVarMid = grainRateVarLow;
+	grainRateVarHigh = (double)p[5]; if (grainRateVarHigh < grainRateVarMid) grainRateVarHigh = grainRateVarMid;
+	grainRateVarTight = (double)p[6];
 
-	freqLow = (double)p[12];
-	freqMid = (double)p[13]; if (freqMid < freqLow) freqMid = freqLow;
-	freqHigh = (double)p[14]; if (freqHigh < freqMid) freqHigh = freqMid;
-	freqTight = (double)p[15];
+	freqLow = (double)p[11];
+	freqMid = (double)p[12]; if (freqMid < freqLow) freqMid = freqLow;
+	freqHigh = (double)p[13]; if (freqHigh < freqMid) freqHigh = freqMid;
+	freqTight = (double)p[14];
 
 
-	panLow = (double)p[16];
-	panMid = (double)p[17]; if (panMid < panLow) panMid = panLow;
-	panHigh = (double)p[18]; if (panHigh < panMid) panHigh = panMid;
-	panTight = (double)p[19];
+	panLow = (double)p[15];
+	panMid = (double)p[16]; if (panMid < panLow) panMid = panLow;
+	panHigh = (double)p[17]; if (panHigh < panMid) panHigh = panMid;
+	panTight = (double)p[18];
 
 	// Ouput amplitude will eventually be adjusted here
 	// grainsRequired = calcgrainsrequired();
