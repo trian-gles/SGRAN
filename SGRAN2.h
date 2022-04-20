@@ -50,6 +50,7 @@ private:
 	float amp;
 
 	std::vector<Grain*>* grains;
+	int grainLimit;
 	int newGrainCounter;
 
 	int grainRateSamps;

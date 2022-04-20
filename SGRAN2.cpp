@@ -57,8 +57,8 @@ int SGRAN2::init(double p[], int n_args)
 		p19: panTight
 		p20: wavetable
 		p21: grainEnv
+		p22: grainLimit=1500
 	*/
-
 	if (rtsetoutput(p[0], p[1], this) == -1)
 		return DONT_SCHEDULE;
 
@@ -66,7 +66,9 @@ int SGRAN2::init(double p[], int n_args)
 	      return die("SGRAN2", "Output must be mono or stereo.");
 
 	if (n_args < 22)
-		return die("SGRAN2", "all arguments are required");
+		return die("SGRAN2", "22 arguments are required");
+	else if (n_args > 23)
+		return die("SGRAN2", "too many arguments");
 	grainEnvLen = 0;
 	wavetableLen = 0;
 	amp = p[2];
@@ -79,6 +81,19 @@ int SGRAN2::init(double p[], int n_args)
 	wavetable = (double *) getPFieldTable(20, &wavetableLen);
 	grainEnv = (double *) getPFieldTable(21, &grainEnvLen);
 
+	if (n_args > 22)
+	{
+		grainLimit = p[22];
+		if (grainLimit > MAXGRAINS)
+		{
+			rtcmix_advise("STGRAN2", "user provided max grains exceeds limit, lowering to 1500");
+			grainLimit = MAXGRAINS;
+		}
+			
+	}
+	else
+		grainLimit = MAXGRAINS;
+
 	return nSamps();
 }
 
@@ -86,12 +101,14 @@ int SGRAN2::init(double p[], int n_args)
 
 int SGRAN2::configure()
 {
+	std::cout << "running config with grainLimit " << grainLimit << "\n";
 	// make the needed grains, which have no values yet as they need to be set dynamically
 	grains = new std::vector<Grain*>();
 	// maybe make the maximum grain value a non-pfield enabled parameter
 
-	for (int i = 0; i < MAXGRAINS; i++)
+	for (int i = 0; i < grainLimit; i++)
 	{
+		std::cout << "pushing grain \n";
 		grains->push_back(new Grain());
 	}
 
@@ -210,15 +227,15 @@ int SGRAN2::run()
 				else
 				{
 					// should include an interpolation option at some point
-					float grainAmp = oscil(1, currGrain->ampSampInc, grainEnv, grainEnvLen, &((*currGrain).ampPhase));
-					float grainOut = oscil(grainAmp,currGrain->waveSampInc, wavetable, wavetableLen, &((*currGrain).wavePhase));
+					float grainAmp = oscili(1, currGrain->ampSampInc, grainEnv, grainEnvLen, &((*currGrain).ampPhase));
+					float grainOut = oscili(grainAmp,currGrain->waveSampInc, wavetable, wavetableLen, &((*currGrain).wavePhase));
 					out[0] += grainOut * currGrain->panL;
 					out[1] += grainOut * currGrain->panR;
 				}
 			}
 			// this is not an else statement so a grain can be potentially stopped and restarted on the same frame
 
-			if ((newGrainCounter == 0) && !currGrain->isplaying)
+			if ((newGrainCounter <= 0) && !currGrain->isplaying)
 			{
 				resetgraincounter();
 				if (newGrainCounter > 0) // we don't allow two grains to be create o
@@ -230,7 +247,7 @@ int SGRAN2::run()
 		}
 
 		// if all current grains are occupied, we skip this request for a new grain
-		if (newGrainCounter == 0)
+		if (newGrainCounter <= 0)
 		{
 			resetgraincounter();
 		}

@@ -15,12 +15,6 @@
 #define MAXBUFFER 441000
 #define MAXGRAINS 1500
 
-// Construct an instance of this instrument and initialize some variables.
-// Using an underbar as the first character of a data member is a nice
-// convention to follow, but it's not necessary, of course.  It helps you
-// to see at a glance whether you're looking at a local variable or a
-// data member.
-
 AUDIOBUFFER::AUDIOBUFFER(int size): _full(false), _head(0)
 {
     _buffer = new std::vector<double>(MAXBUFFER);
@@ -111,13 +105,6 @@ STGRAN2::~STGRAN2()
 }
 
 
-// Called by the scheduler to initialize the instrument. Things done here:
-//   - read, store and check pfields
-//   - set output file (or bus) pointer
-//   - init instrument-specific things
-// If there's an error here (like invalid pfields), call and return die() to
-// report the error.  If you just want to warn the user and keep going,
-// call warn() or rterror() with a message.
 
 int STGRAN2::init(double p[], int n_args)
 {
@@ -160,10 +147,8 @@ int STGRAN2::init(double p[], int n_args)
 	if (n_args < 21)
 		return die("STGRAN2", "21 arguments are required");
 
-	if (n_args > 21)
-
 	else if (n_args > 24)
-		return die("STGRAN2", "too many args");
+		return die("STGRAN2", "too many arguments");
 
 	if (inputChannels() > 1)
 		rtcmix_advise("STGRAN2", "Only the first input channel will be used");
@@ -175,10 +160,18 @@ int STGRAN2::init(double p[], int n_args)
 
 	grainRate = p[3];
 
-	if (n_args > 21)
+	if (n_args > 22)
 	{
-
+		grainLimit = p[22];
+		if (grainLimit > MAXGRAINS)
+		{
+			rtcmix_advise("STGRAN2", "user provided max grains exceeds limit, lowering to 1500");
+			grainLimit = MAXGRAINS;
+		}
+			
 	}
+	else
+		grainLimit = MAXGRAINS;
 
 
 	newGrainCounter = 0;
@@ -192,21 +185,12 @@ int STGRAN2::init(double p[], int n_args)
 }
 
 
-
-// For non-interactive (script-driven) sessions, the constructor and init()
-// for every instrument in the script are called before any of them runs.
-// By contrast, configure() is called right before the instrument begins
-// playing.  If we were to allocate memory at init time, then all notes in
-// the score would allocate memory then, resulting in a potentially excessive
-// memory footprint.  So this is the place to allocate any substantial amounts
-// of memory you might be using.
-
 int STGRAN2::configure()
 {
 	// make the needed grains, which have no values yet as they need to be set dynamically
 	grains = new std::vector<Grain*>();
 	// maybe make the maximum grain value a non-pfield enabled parameter
-	for (int i = 0; i < MAXGRAINS; i++)
+	for (int i = 0; i < grainLimit; i++)
 	{
 		grains->push_back(new Grain());
 	}
@@ -219,9 +203,6 @@ int STGRAN2::configure()
 
 	return 0;	// IMPORTANT: Return 0 on success, and -1 on failure.
 }
-// void addgrain(float sampInc; float trans; float dur; float pan; bool isplaying;);
-//        void resetgrsain(Grain* grain);
-//        int calcgrainsrequired();
 
 double STGRAN2::prob(double low,double mid,double high,double tight)
         // Returns a value within a range close to a preferred value
@@ -364,8 +345,6 @@ void STGRAN2::doupdate()
 
 }
 
-// Called by the scheduler for every time slice in which this instrument
-// should run.  This is where the real work of the instrument is done.
 int STGRAN2::run()
 {	
 	//std::cout<<"new control block"<<"\n";
@@ -437,10 +416,6 @@ int STGRAN2::run()
 }
 
 
-// The scheduler calls this to create an instance of this instrument
-// and to set up the bus-routing fields in the base Instrument class.
-// This happens for every "note" in a score.
-
 Instrument *makeSTGRAN2()
 {
 	STGRAN2 *inst = new STGRAN2();
@@ -449,10 +424,6 @@ Instrument *makeSTGRAN2()
 	return inst;
 }
 
-
-// The rtprofile introduces this instrument to the RTcmix core, and
-// associates a script function name (in quotes below) with the instrument.
-// This is the name the instrument goes by in a script.
 
 #ifndef EMBEDDED
 void rtprofile()
