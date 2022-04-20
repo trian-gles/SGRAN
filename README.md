@@ -29,25 +29,24 @@ Args:
     - p0: inskip  
     - p1: dur  
     - p2: amp*  
-    - p3: grainRate (seconds before new grain)  
-    - p4: grainRateVarLow (fraction of grainRate actually used)*  
-    - p5: grainRateVarMid*  
-    - p6: grainRateVarHigh*  
-    - p7: grainRateVarTight*  
-    - p8: grainDurLow (length of grain in seconds)*  
-    - p9: grainDurMid*  
-    - p10: grainDurHigh*  
-    - p11: grainDurTight*  
-    - p12: freqLow (Hz)*  
-    - p13: freqMid*  
-    - p14: freqHigh*  
-    - p15: freqTight*  
-    - p16: panLow (0 - 1.0)*  
-    - p17: panMid*  
-    - p18: panHigh*  
-    - p19: panTight*  
-    - p20: wavetable**  
-    - p21: grainEnv**  
+    - p3: grainRateVarLow (seconds before new grain)*  
+    - p4: grainRateVarMid*  
+    - p5: grainRateVarHigh*  
+    - p6: grainRateVarTight*  
+    - p7: grainDurLow (length of grain in seconds)*  
+    - p8: grainDurMid*  
+    - p9: grainDurHigh*  
+    - p10: grainDurTight*  
+    - p11: freqLow (Hz)*  
+    - p12: freqMid*  
+    - p13: freqHigh*  
+    - p14: freqTight*  
+    - p15: panLow (0 - 1.0)*  
+    - p16: panMid*  
+    - p17: panHigh*  
+    - p18: panTight*  
+    - p19: wavetable**  
+    - p20: grainEnv**  
     
 \* may receive a reference to a pfield handle  
 \*\* must receive a reference to a pfield maketable handle  
@@ -58,26 +57,25 @@ Args:
 Args:  
     - p0: inskip  
     - p1: dur  
-    - p2: amp*  
-    - p3: grainRate (seconds before new grain)  
-    - p4: grainRateVarLow (fraction of grainRate actually used)*  
-    - p5: grainRateVarMid*  
-    - p6: grainRateVarHigh*  
-    - p7: grainRateVarTight*  
-    - p8: grainDurLow (length of grain in seconds)*  
-    - p9: grainDurMid*  
-    - p10: grainDurHigh*  
-    - p11: grainDurTight*  
-    - p12: freqLow (Hz)*  
-    - p13: freqMid*  
-    - p14: freqHigh*  
-    - p15: freqTight*  
-    - p16: panLow (0 - 1.0)*  
-    - p17: panMid*  
-    - p18: panHigh*  
-    - p19: panTight*  
-    - p20: grainEnv**
-    - p21: (optional) preferred size of the input buffer used in seconds, higher sizes will cause more smear of impulses or sudden changes.  1 by default*
+    - p2: amp*    
+    - p3: grainRateVarLow (seconds before new grain)*  
+    - p4: grainRateVarMid*  
+    - p5: grainRateVarHigh*  
+    - p6: grainRateVarTight*  
+    - p7: grainDurLow (length of grain in seconds)*  
+    - p8: grainDurMid*  
+    - p9: grainDurHigh*  
+    - p10: grainDurTight*  
+    - p11: freqLow (Hz)*  
+    - p12: freqMid*  
+    - p13: freqHigh*  
+    - p14: freqTight*  
+    - p15: panLow (0 - 1.0)*  
+    - p16: panMid*  
+    - p17: panHigh*  
+    - p18: panTight*  
+    - p19: grainEnv**
+    - p20: (optional) preferred size of the input buffer used in seconds, higher sizes will cause more smear of impulses or sudden changes.  1 by default*
     
 \* may receive a reference to a pfield handle  
 \*\* must receive a reference to a pfield maketable handle
