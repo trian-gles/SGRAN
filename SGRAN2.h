@@ -2,15 +2,15 @@
 #include <vector>
 		  // the base class for this instrument
 typedef struct {
-	float waveSampInc = 0; 
-	float ampSampInc = 0; 
-	float wavePhase = 0; 
-	float ampPhase = 0; 
-	int dur = 0; 
-	float panR = 0; 
-	float panL = 0; 
-	int currTime = 0; 
-	bool isplaying = false;
+	float waveSampInc; 
+	float ampSampInc; 
+	float wavePhase; 
+	float ampPhase; 
+	int dur; 
+	float panR; 
+	float panL; 
+	int currTime; 
+	bool isplaying;
 	} Grain;
 
 
