@@ -5,7 +5,7 @@ load("./libSGRAN2.so")
                 p0: inskip
                 p1: dur
                 p2: amp*
-                p3: grainRateVarLow (fraction of grainRate actually used)*
+                p3: grainRateVarLow (seconds before new grain)*
                 p4: grainRateVarMid*
                 p5: grainRateVarHigh*
                 p6: grainRateVarTight*

@@ -180,6 +180,7 @@ int STGRAN2::init(double p[], int n_args)
 	// init tables
 	grainEnv = (double *) getPFieldTable(19, &grainEnvLen);
 
+	oneover_cpsoct10 = 1.0 / cpsoct(10.0);
 
 	return nSamps();
 }
@@ -231,8 +232,8 @@ void STGRAN2::resetgrain(Grain* grain)
 		return;
 
 	float trans = (float)prob(transLow, transMid, transHigh, transTight);
-	float rate = pow(2, trans / 12);
-	float offset = rate - 1;
+	float increment = cpsoct(10.0 + trans) * oneover_cpsoct10;
+	float offset = increment - 1;
 	float grainDurSamps = (float) prob(grainDurLow, grainDurMid, grainDurHigh, grainDurTight) * SR;
 	int sampOffset = (int) round(abs(grainDurSamps * offset)); // how many total samples the grain will deviate from the normal buffer movement
 
@@ -275,14 +276,14 @@ void STGRAN2::resetgrain(Grain* grain)
 	
 	
 	float panR = (float) prob(panLow, panMid, panHigh, panTight);
-	grain->waveSampInc = rate;
+	grain->waveSampInc = increment;
 	grain->ampSampInc = ((float)grainEnvLen) / grainDurSamps;
 
 	grain->isplaying = true;
 	grain->ampPhase = 0;
 	grain->panR = panR;
 	grain->panL = 1 - panR; // separating these in RAM means fewer sample rate calculations
-	grain->endTime = grainDurSamps * rate + grain->currTime;
+	grain->endTime = grainDurSamps * increment + grain->currTime;
 	//std::cout<<"sending grain with start time : "<< grain->currTime << " first sample : " << buffer->Get(grain->currTime) << "\n";
 }
 
@@ -309,10 +310,10 @@ void STGRAN2::doupdate()
 	grainRateVarHigh = (double)p[5]; if (grainRateVarHigh < grainRateVarMid) grainRateVarHigh = grainRateVarMid;
 	grainRateVarTight = (double)p[6];
 
-	transLow = (double)p[11];
-	transMid = (double)p[12]; if (transMid < transLow) transMid = transLow;
-	transHigh = (double)p[13]; if (transHigh < transMid) transHigh = transMid;
-	transTight = (double)p[14];
+	transLow = octpch((double)p[11]);
+	transMid = octpch((double)p[12]); if (transMid < transLow) transMid = transLow;
+	transHigh = octpch((double)p[13]); if (transHigh < transMid) transHigh = transMid;
+	transTight = octpch((double)p[14]);
 
 
 	panLow = (double)p[15];

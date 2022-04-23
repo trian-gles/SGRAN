@@ -45,9 +45,9 @@ durmid = maketable("line", "nonorm", 1000, 0, 0.08, 1, 0.4)
 durhi = maketable("line", "nonorm", 1000, 0, 0.1, 1, 0.8)
 durti = 0.6
 
-translo = maketable("line", "nonorm", 1000, 0, -2, 1, -14)
+translo = -1.00
 transmid = 0
-transhi = maketable("line", "nonorm", 1000, 0, 2, 1, 14)
+transhi = 1.00
 transtight = maketable("line", "nonorm", 1000, 0, 2, 1, 0.1)
 
 panlo = 0
