@@ -2,7 +2,7 @@ rtsetparams(44100, 2)
 load("./libSGRAN2.so")
 
         /* Args:
-                p0: inskip
+                p0: outskip
                 p1: dur
                 p2: amp*
                 p3: grainRateVarLow (seconds before new grain)*
@@ -27,7 +27,7 @@ load("./libSGRAN2.so")
 		* p20(wavetable) and p21(grainEnv) must be passed as pfield make tables.  
 		p2(amp) may receive a table or some other pfield source
         */
-inskip = 0
+outskip = 0
 dur = 25
 
 amp = maketable("line", 1000, 0, 0, 8, 0.8, 16, 1, 17, 0)
@@ -55,7 +55,7 @@ panti = 0.4
 wave = maketable("wave", 1000, "square")
 env = src_env = maketable("window", 1000, "hanning")
 
-SGRAN2(inskip, dur, 800 * amp, ratelo, ratemid, ratehi, rateti, durlo, durmid, durhi, durti, 
+SGRAN2(outskip, dur, 800 * amp, ratelo, ratemid, ratehi, rateti, durlo, durmid, durhi, durti, 
 freqlo, freqmid, freqhi, freqti, panlo, panmid, panhi, panti, wave, env)
 
 

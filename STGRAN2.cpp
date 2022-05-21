@@ -115,42 +115,43 @@ int STGRAN2::init(double p[], int n_args)
 
 	/* Args:
 		p0: inskip
-		p1: dur
-		p2: amp
-		p3: grainRateVarLow
-		p4: grainRateVarMid
-		p5: grainRateVarHigh
-		p6: grainRateVarTigh
-		p7: grainDurLow
-		p8: grainDurMid
-		p9: grainDurHigh
-		p10: grainDurTight
-		p11: transLow (cents)
-		p12: transMid
-		p13: transHigh
-		p14: transTight
-		p15: panLow
-		p16: panMid
-		p17: panHigh
-		p18: panTight
-		p19: grainEnv
-		p20: bufferSize=1
-		p21: grainLimit=1500
+		p1: outskip
+		p2: dur
+		p3: amp
+		p4: grainRateVarLow
+		p5: grainRateVarMid
+		p6: grainRateVarHigh
+		p7: grainRateVarTigh
+		p8: grainDurLow
+		p9: grainDurMid
+		p10: grainDurHigh
+		p11: grainDurTight
+		p12: transLow (cents)
+		p13: transMid
+		p14: transHigh
+		p15: transTight
+		p16: panLow
+		p17: panMid
+		p18: panHigh
+		p19: panTight
+		p20: grainEnv
+		p21: bufferSize=1
+		p22: grainLimit=1500
 	*/
 
-	if (rtsetinput(p[0], this) == -1)
+	if (rtsetinput(p[1], this) == -1)
       		return DONT_SCHEDULE; // no input
 
-	if (rtsetoutput(p[0], p[1], this) == -1)
+	if (rtsetoutput(p[0], p[2], this) == -1)
 		return DONT_SCHEDULE;
 
 	if (outputChannels() > 2)
 	      return die("STGRAN2", "Output must be mono or stereo.");
 
-	if (n_args < 20)
-		return die("STGRAN2", "20 arguments are required");
+	if (n_args < 21)
+		return die("STGRAN2", "21 arguments are required");
 
-	else if (n_args > 23)
+	else if (n_args > 24)
 		return die("STGRAN2", "too many arguments");
 
 	if (inputChannels() > 1)
@@ -159,11 +160,11 @@ int STGRAN2::init(double p[], int n_args)
 	_nargs = n_args;
 
 	grainEnvLen = 0;
-	amp = p[2];
+	amp = p[3];
 
-	if (n_args > 21)
+	if (n_args > 22)
 	{
-		grainLimit = p[21];
+		grainLimit = p[22];
 		if (grainLimit > MAXGRAINS)
 		{
 			rtcmix_advise("STGRAN2", "user provided max grains exceeds limit, lowering to 1500");
@@ -178,7 +179,7 @@ int STGRAN2::init(double p[], int n_args)
 	newGrainCounter = 0;
 
 	// init tables
-	grainEnv = (double *) getPFieldTable(19, &grainEnvLen);
+	grainEnv = (double *) getPFieldTable(20, &grainEnvLen);
 
 	oneover_cpsoct10 = 1.0 / cpsoct(10.0);
 
@@ -295,35 +296,35 @@ void STGRAN2::resetgraincounter()
 // update pfields
 void STGRAN2::doupdate()
 {
-	double p[21];
-	update(p, 21); // this could be fixed to only update necessary p-fields
-	amp =(float) p[2];
+	double p[22];
+	update(p, 22); // this could be fixed to only update necessary p-fields
+	amp =(float) p[3];
 
-	grainDurLow = (double)p[7];
-	grainDurMid = (double)p[8]; if (grainDurMid < grainDurLow) grainDurMid = grainDurLow;
-	grainDurHigh = (double)p[9]; if (grainDurHigh < grainDurMid) grainDurHigh = grainDurMid;
-	grainDurTight = (double)p[10];
-
-
-	grainRateVarLow = (double)p[3];
-	grainRateVarMid = (double)p[4]; if (grainRateVarMid < grainRateVarLow) grainRateVarMid = grainRateVarLow;
-	grainRateVarHigh = (double)p[5]; if (grainRateVarHigh < grainRateVarMid) grainRateVarHigh = grainRateVarMid;
-	grainRateVarTight = (double)p[6];
-
-	transLow = octpch((double)p[11]);
-	transMid = octpch((double)p[12]); if (transMid < transLow) transMid = transLow;
-	transHigh = octpch((double)p[13]); if (transHigh < transMid) transHigh = transMid;
-	transTight = octpch((double)p[14]);
+	grainDurLow = (double)p[8];
+	grainDurMid = (double)p[9]; if (grainDurMid < grainDurLow) grainDurMid = grainDurLow;
+	grainDurHigh = (double)p[10]; if (grainDurHigh < grainDurMid) grainDurHigh = grainDurMid;
+	grainDurTight = (double)p[11];
 
 
-	panLow = (double)p[15];
-	panMid = (double)p[16]; if (panMid < panLow) panMid = panLow;
-	panHigh = (double)p[17]; if (panHigh < panMid) panHigh = panMid;
-	panTight = (double)p[18];
+	grainRateVarLow = (double)p[4];
+	grainRateVarMid = (double)p[5]; if (grainRateVarMid < grainRateVarLow) grainRateVarMid = grainRateVarLow;
+	grainRateVarHigh = (double)p[6]; if (grainRateVarHigh < grainRateVarMid) grainRateVarHigh = grainRateVarMid;
+	grainRateVarTight = (double)p[7];
 
-	if (_nargs > 20)
+	transLow = octpch((double)p[12]);
+	transMid = octpch((double)p[13]); if (transMid < transLow) transMid = transLow;
+	transHigh = octpch((double)p[14]); if (transHigh < transMid) transHigh = transMid;
+	transTight = octpch((double)p[15]);
+
+
+	panLow = (double)p[16];
+	panMid = (double)p[17]; if (panMid < panLow) panMid = panLow;
+	panHigh = (double)p[18]; if (panHigh < panMid) panHigh = panMid;
+	panTight = (double)p[19];
+
+	if (_nargs > 21)
 	{
-		int bufferSize = (int) floor(SR * p[20]);
+		int bufferSize = (int) floor(SR * p[21]);
 		
 		if (bufferSize > MAXBUFFER)
 		{
