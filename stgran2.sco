@@ -50,7 +50,7 @@ durti = 0.6
 translo = -1.00
 transmid = 0
 transhi = 1.00
-transtight = maketable("line", "nonorm", 1000, 0, 2, 1, 0.1)
+transti = maketable("line", "nonorm", 1000, 0, 2, 1, 0.1)
 
 panlo = 0
 panmid = 0.5
@@ -62,6 +62,6 @@ env = maketable("window", 1000, "hanning")
 buffer_size = makeLFO("square", 0.5, 0.02, 1)
 
 STGRAN2(outskip, inskip, dur, 0.2 * amp, ratelo, ratemid, ratehi, rateti, durlo, durmid, durhi, durti, 
-translo, transmid, transhi, transhi, panlo, panmid, panhi, panti, env, buffer_size)
+translo, transmid, transhi, transti, panlo, panmid, panhi, panti, env, buffer_size)
 
 
