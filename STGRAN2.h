@@ -54,6 +54,7 @@ private:
 	bool configured;
 	AUDIOBUFFER* buffer;
 	float* in;
+	int inchan;
 
 	double oneover_cpsoct10;
 	double transLow;

@@ -137,6 +137,7 @@ int STGRAN2::init(double p[], int n_args)
 		p20: grainEnv
 		p21: bufferSize=1
 		p22: grainLimit=1500
+		p23: inchan=0
 	*/
 
 	if (rtsetinput(p[1], this) == -1)
@@ -175,6 +176,13 @@ int STGRAN2::init(double p[], int n_args)
 	else
 		grainLimit = MAXGRAINS;
 
+	if (n_args > 23)
+		inchan = p[23];
+	else
+		inchan = 0;
+
+	if (inchan >= inputChannels())
+		return die("MYINST", "You asked for channel %d of a %d-channel input.",								                                             inchan, inputChannels());
 
 	newGrainCounter = 0;
 
@@ -345,7 +353,7 @@ int STGRAN2::run()
 	rtgetin(in, this, samps);
 	//int grainsCurrUsed = 0;
 	for (int i = 0; i < samps; i += inputChannels()) {
-		buffer->Append(in[i]); // currently only takes the left input
+		buffer->Append(in[i + inchan]); // currently only takes the left input
 		if (--branch <= 0)
 		{
 			doupdate();

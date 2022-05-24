@@ -26,7 +26,8 @@ load("./libSTGRAN2.so")
 		p19: panTight*
                 p20: grainEnv**
                 p21: bufferSize=1 (size of the buffer used to choose new grains)*
-		
+		p22: maxGrains=1500
+		p23: inchan=0
 		
 		* may receive a table or some other pfield source
                 ** must be passed as a pfield maketable.  
