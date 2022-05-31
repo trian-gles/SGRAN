@@ -262,7 +262,7 @@ void STGRAN2::resetgrain(Grain* grain)
 		int minShift;
 		int maxShift;
 
-		if (offset< 0)
+		if (offset > 0)
 		{
 			minShift = sampOffset;
 			maxShift = buffer->GetSize();
