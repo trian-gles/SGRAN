@@ -114,30 +114,33 @@ int STGRAN2::init(double p[], int n_args)
 {
 
 	/* Args:
-		p0: inskip
-		p1: outskip
+		p0: outskip
+		p1: inskip
 		p2: dur
-		p3: amp
-		p4: grainRateVarLow
-		p5: grainRateVarMid
-		p6: grainRateVarHigh
-		p7: grainRateVarTigh
-		p8: grainDurLow
-		p9: grainDurMid
-		p10: grainDurHigh
-		p11: grainDurTight
-		p12: transLow (cents)
-		p13: transMid
-		p14: transHigh
-		p15: transTight
-		p16: panLow
-		p17: panMid
-		p18: panHigh
-		p19: panTight
-		p20: grainEnv
-		p21: bufferSize=1
-		p22: grainLimit=1500
+		p3: amp*
+		p4: rateLow (seconds before new grain)*
+		p5: rateMid*
+		p6: rateHigh*
+		p7: rateTight*
+		p8: durLow (length of grain in seconds)*
+		p9: durMid*
+		p10: durHigh*
+		p11: durTight*
+		p12: transLow (oct.pc)*
+		p13: transMid (oct.pc)*
+		p14: transHigh (oct.pc)*
+		p15: transTight*
+		p16: panLow (0 - 1.0)*
+		p17: panMid*
+		p18: panHigh*
+		p19: panTight*
+		p20: grainEnv**
+		p21: bufferSize=1 (size of the buffer used to choose new grains)*
+		p22: maxGrains=1500
 		p23: inchan=0
+		
+		* may receive a table or some other pfield source
+		** must be passed as a pfield maketable.  
 	*/
 
 	if (rtsetinput(p[1], this) == -1)

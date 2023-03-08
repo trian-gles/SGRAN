@@ -34,30 +34,33 @@ SGRAN2::~SGRAN2()
 int SGRAN2::init(double p[], int n_args)
 {
 
-	/* Args:
-		p0: inskip
+/* Args:
+		p0: outskip
 		p1: dur
-		p2: amp
-		p3: grainRateVarLow
-		p4: grainRateVarMid
-		p5: grainRateVarHigh
-		p6: grainRateVarTigh
-		p7: grainDurLow
-		p8: grainDurMid
-		p9: grainDurHigh
-		p10: grainDurTight
-		p11: freqLow
-		p12: freqMid
-		p13: freqHigh
-		p14: freqTight
-		p15: panLow
-		p16: panMid
-		p17: panHigh
-		p18: panTight
-		p19: wavetable
-		p20: grainEnv
-		p21: grainLimit=1500
-	*/
+		p2: amp*
+		p3: rateLow (seconds before new grain)*
+		p4: rateMid*
+		p5: rateHigh*
+		p6: rateTight*
+		p7: durLow (length of grain in seconds)*
+		p8: durMid*
+		p9: durHigh*
+		p10: durTight*
+		p11: freqLow*
+		p12: freqMid*
+		p13: freqHigh*
+		p14: freqTight*
+		p15: panLow (0 - 1.0)*
+		p16: panMid*
+		p17: panHigh*
+		p18: panTight*
+		p19: wavetable**
+		p20: grainEnv** 
+		p21: grainLimit=1500 (optional)
+
+		* may recieve pfield values
+		** must be passed pfield maketables.
+*/
 	if (rtsetoutput(p[0], p[1], this) == -1)
 		return DONT_SCHEDULE;
 

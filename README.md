@@ -38,17 +38,27 @@ See the included scorefiles.
 
 Args:  
     - p0: inskip  
+
     - p1: duration
+
     - p2: amplitude*  
+
     - p3-6: rate values (seconds before the next grain grain)* 
+
     - p7-10: duration values (length of grain in seconds)*
+
     - p11-14: pitch values (Hz or oct.pc)*
+
     - p15-18: pan values(0 - 1.0)* 
+
     - p19: synthesis waveform**  
+
     - p20: grain amplitude envelope**  
+
     - p21: maximum concurrent grains [optional; default is 1500]
     
 \* may receive a reference to a pfield handle  
+
 \*\* must receive a reference to a pfield maketable handle  
 
 
@@ -56,15 +66,25 @@ Args:
 
 Args:  
     - p0: inskip  
+
     - p1: dur  
+
     - p2: amp* 
+
     - p3-6: rate values (seconds before the next grain grain)* 
+
     - p7-10: duration values (length of grain in seconds)*
+
     - p11-14: transposition values (oct.pc)*
+
     - p15-18: pan values(0 - 1.0)*  
+
     - p19: grain amplitude envelope**
+
     - p20: size of the buffer used to choose grain start points [optional; default is 1]*
+
     - p21: maximum concurrent grains [optional; default is 1500]
     
 \* may receive a reference to a pfield handle  
+
 \*\* must receive a reference to a pfield maketable handle

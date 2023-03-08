@@ -1,6 +1,6 @@
 rtsetparams(44100, 2)
 rtinput("clar.aiff")
-
+// rtoutput("new1.wav")
 load("./libSTGRAN2.so")
 
         /* Args:
@@ -8,17 +8,17 @@ load("./libSTGRAN2.so")
                 p1: inskip
                 p2: dur
                 p3: amp*
-                p4: grainRateVarLow (seconds before new grain)*
-                p5: grainRateVarMid*
-                p6: grainRateVarHigh*
-                p7: grainRateVarTight*
-                p8: grainDurLow (length of grain in seconds)*
-                p9: grainDurMid*
-                p10: grainDurHigh*
-                p11: grainDurTight*
-                p12: transLow (semitones)*
-                p13: transMid (semitones)*
-                p14: transHigh (semitones)*
+                p4: rateLow (seconds before new grain)*
+                p5: rateMid*
+                p6: rateHigh*
+                p7: rateTight*
+                p8: durLow (length of grain in seconds)*
+                p9: durMid*
+                p10: durHigh*
+                p11: durTight*
+                p12: transLow (oct.pc)*
+                p13: transMid (oct.pc)*
+                p14: transHigh (oct.pc)*
                 p15: transTight*
 		p16: panLow (0 - 1.0)*
 		p17: panMid*
@@ -35,23 +35,23 @@ load("./libSTGRAN2.so")
 
 outskip = 0
 inskip = 60
-dur = 20
+dur = 80
 amp = maketable("line", 1000, 0, 0, 1, 1, 20, 1, 21, 0)
 
-ratelo = 0.0004
-ratemid = 0.001
+ratelo = 0.00004
+ratemid = 0.0001
 ratehi = .004
-rateti = 3 
+rateti = 0.6 
 
-durlo = maketable("line", "nonorm", 1000, 0, 0.02, 1, 0.08)
-durmid = maketable("line", "nonorm", 1000, 0, 0.08, 1, 0.4)
-durhi = maketable("line", "nonorm", 1000, 0, 0.1, 1, 0.8)
-durti = 0.6
+durlo = 0.02// maketable("line", "nonorm", 1000, 0, 0.02, 1, 0.08)
+durmid =0.08// maketable("line", "nonorm", 1000, 0, 0.08, 1, 0.4)
+durhi = 0.3// maketable("line", "nonorm", 1000, 0, 0.1, 1, 0.8)
+durti = 1
 
 translo = -1.00
 transmid = 0
 transhi = 1.00
-transti = maketable("line", "nonorm", 1000, 0, 2, 1, 0.1)
+transti = 2 // maketable("line", "nonorm", 1000, 0, 2, 1, 0.1)
 
 panlo = 0
 panmid = 0.5
