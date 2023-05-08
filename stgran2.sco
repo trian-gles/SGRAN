@@ -1,6 +1,5 @@
 rtsetparams(44100, 2)
 rtinput("clar.aiff")
-// rtoutput("new1.wav")
 load("./libSTGRAN2.so")
 
         /* Args:
@@ -43,15 +42,15 @@ ratemid = 0.0001
 ratehi = .004
 rateti = 0.6 
 
-durlo = 0.02// maketable("line", "nonorm", 1000, 0, 0.02, 1, 0.08)
-durmid =0.08// maketable("line", "nonorm", 1000, 0, 0.08, 1, 0.4)
-durhi = 0.3// maketable("line", "nonorm", 1000, 0, 0.1, 1, 0.8)
+durlo = 0.02
+durmid =0.08
+durhi = 0.3
 durti = 1
 
 translo = -1.00
 transmid = 0
 transhi = 1.00
-transti = 2 // maketable("line", "nonorm", 1000, 0, 2, 1, 0.1)
+transti = 2
 
 panlo = 0
 panmid = 0.5
