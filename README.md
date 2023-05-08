@@ -37,6 +37,7 @@ See the included scorefiles.
 ### SGRAN2
 
 Args:  
+
     - p0: outskip  
 
     - p1: duration
@@ -65,6 +66,7 @@ Args:
 ### STGRAN2
 
 Args:
+
     - p0: outskip 
     
     - p1: inskip 
