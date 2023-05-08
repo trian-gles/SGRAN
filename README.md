@@ -64,7 +64,7 @@ Args:
 
 ### STGRAN2
 
-Args:  
+Args:
     - p0: outskip 
     
     - p1: inskip 
