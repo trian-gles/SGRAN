@@ -1,5 +1,5 @@
 ## About
-Stochastic granular synthesizers for RTcmix version 4.5 based on Dr. Mara Helmuth's SGRANR instrument, with added pfield control, improved performance, and additional buffer features.  SGRAN2 works with periodic waveforms while STGRAN2 works with a provided soundfile or live input signal.
+Stochastic granular synthesizers for RTcmix version 4.5 based on the SGRANR instrument, with added pfield control, improved performance, and additional buffer features.  SGRAN2 works with periodic waveforms while STGRAN2 works with a provided soundfile or live input signal.
 
 ## Examples
 ### SGRAN2
